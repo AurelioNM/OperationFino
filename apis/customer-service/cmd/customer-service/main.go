@@ -2,6 +2,8 @@ package main
 
 import (
 	"cmd/customer-service/internal/api"
+	"cmd/customer-service/internal/domain/service"
+	"cmd/customer-service/internal/resources/database"
 	"log"
 	"net/http"
 	"os"
@@ -17,7 +19,9 @@ func main() {
 		Level: slog.LevelDebug,
 	}))
 
-	customerHandler := api.NewCustomerHandler(logger)
+	customerGtw := database.NewCustomerGateway(*logger)
+	customerSvc := service.NewCustomerService(*logger, customerGtw)
+	customerHandler := api.NewCustomerHandler(*logger, customerSvc)
 
 	r.HandleFunc("/customers", customerHandler.GetCustomers).Methods("GET")
 	r.HandleFunc("/customers", customerHandler.CreateCustomer).Methods("POST")

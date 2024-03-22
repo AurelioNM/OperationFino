@@ -2,6 +2,7 @@ package api
 
 import (
 	"cmd/customer-service/internal/domain/entity"
+	"cmd/customer-service/internal/domain/service"
 	"encoding/json"
 	"net/http"
 	"strconv"
@@ -13,29 +14,53 @@ import (
 
 type CustomerHandler interface {
 	GetCustomers(w http.ResponseWriter, r *http.Request)
+	GetCustomerByID(w http.ResponseWriter, r *http.Request)
 	CreateCustomer(w http.ResponseWriter, r *http.Request)
 	UpdateCustomer(w http.ResponseWriter, r *http.Request)
 	DeleteCustomer(w http.ResponseWriter, r *http.Request)
 }
 
 type customerHandler struct {
-	logger    *slog.Logger
-	Customers []entity.Customer
+	logger      slog.Logger
+	customerSvc service.CustomerService
 }
 
-func NewCustomerHandler(logger *slog.Logger) CustomerHandler {
+func NewCustomerHandler(l slog.Logger, s service.CustomerService) CustomerHandler {
 	return &customerHandler{
-		logger: logger,
-		Customers: []entity.Customer{
-			{ID: 1, Name: "Fulano", Surname: "Beltrano", Email: "fulano@gmail.com"},
-			{ID: 2, Name: "Ciclano", Surname: "Nunes", Email: "ciclano@gmail.com"},
-		},
+		logger:      *l.With("layer", "customer-handler"),
+		customerSvc: s,
 	}
 }
 
 func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
-	h.logger.Info("Retrieving all customers")
-	json.NewEncoder(w).Encode(h.Customers)
+	h.logger.Info("Getting all customers")
+
+	customers, err := h.customerSvc.GetCustomerList()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(customers)
+}
+
+func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
+	vars := mux.Vars(r)
+	id, err := strconv.Atoi(vars["id"])
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	h.logger.Info("Getting customer by id", "id", id)
+	customers, err := h.customerSvc.GetCustomerList()
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
+	json.NewEncoder(w).Encode(customers)
+	json.NewEncoder(w).Encode(customers[len(customers)-1])
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
@@ -46,9 +71,7 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.Customers = append(h.Customers, customer)
-	h.logger.Debug("Creating new customer", "len", len(h.Customers))
-
+	h.logger.Debug("Creating new customer")
 	w.WriteHeader(http.StatusCreated)
 }
 

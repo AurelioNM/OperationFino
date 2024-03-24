@@ -1,0 +1,36 @@
+version: "3.7"
+services:
+
+  of-customer-postgres:
+    image: postgres
+    ports:
+      - "5441:5432"
+    environment:
+      - POSTGRES_USER=customer
+      - POSTGRES_PASSWORD=customer
+      - POSTGRES_DB=customer-service
+    volumes:
+      - of_customer_postgres_vol:/var/lib/postgresql/data
+
+  of-prometheus:
+    image: prom/prometheus
+    ports:
+      - "9080:9090"
+    volumes:
+      - "./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
+      - "of_prometheus_vol:/prometheus/customer-service"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+
+  of-grafana:
+    image: grafana/grafana
+    ports:
+      - "3010:3000"
+    volumes:
+      - "./observability/grafana:/etc/grafana/provisioning"
+      - "of_grafana_vol:/var/lib/grafana/operation-fino"
+
+volumes:
+  of_customer_postgres_vol: {}
+  of_prometheus_vol: {}
+  of_grafana_vol: {}

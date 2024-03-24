@@ -5,7 +5,6 @@ import (
 	"cmd/customer-service/internal/domain/service"
 	"encoding/json"
 	"net/http"
-	"strconv"
 
 	"log/slog"
 
@@ -33,8 +32,6 @@ func NewCustomerHandler(l slog.Logger, s service.CustomerService) CustomerHandle
 }
 
 func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
-	h.logger.Info("Getting all customers")
-
 	customers, err := h.customerSvc.GetCustomerList()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -46,62 +43,64 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 
 func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id := vars["id"]
+
+	customer, err := h.customerSvc.GetCustomerByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	h.logger.Info("Getting customer by id", "id", id)
-	customers, err := h.customerSvc.GetCustomerList()
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
-	json.NewEncoder(w).Encode(customers)
-	json.NewEncoder(w).Encode(customers[len(customers)-1])
+	json.NewEncoder(w).Encode(customer)
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
 	var customer entity.Customer
 	err := json.NewDecoder(r.Body).Decode(&customer)
 	if err != nil {
+		h.logger.Error("Failed to create customer", "err", err)
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
-	h.logger.Debug("Creating new customer")
+	err = h.customerSvc.CreateCustomer(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusBadRequest)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
 }
 
 func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
-	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
-		return
-	}
-
+	id := vars["id"]
 	var customer entity.Customer
-	err = json.NewDecoder(r.Body).Decode(&customer)
+	err := json.NewDecoder(r.Body).Decode(&customer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
+	customer.ID = &id
 
-	h.logger.Info("Updating customer", "id", id, "body", customer)
+	err = h.customerSvc.UpdateCustomer(customer)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusNotFound)
+		return
+	}
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
-	id, err := strconv.Atoi(vars["id"])
+	id := vars["id"]
+
+	err := h.customerSvc.DeleteCustomerByID(id)
 	if err != nil {
-		http.Error(w, err.Error(), http.StatusBadRequest)
+		http.Error(w, err.Error(), http.StatusNotFound)
 		return
 	}
 
-	h.logger.Info("Deleting customer", "id", id)
 	w.WriteHeader(http.StatusNoContent)
 }

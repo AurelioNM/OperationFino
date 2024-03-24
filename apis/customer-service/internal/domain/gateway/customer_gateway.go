@@ -6,8 +6,8 @@ import (
 
 type CustomerGateway interface {
 	GetCustomerList() ([]*entity.Customer, error)
-	// GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
-	// CreateCustomer(ctx context.Context, customer entity.Customer) error
-	// UpdateCustomer(ctx context.Context, customer entity.Customer) error
-	// DeleteCustomerByID(ctx context.Context, customerID string) error
+	GetCustomerByID(customerID string) (*entity.Customer, error)
+	CreateCustomer(customer entity.Customer) error
+	UpdateCustomer(customer entity.Customer) error
+	DeleteCustomerByID(customerID string) error
 }

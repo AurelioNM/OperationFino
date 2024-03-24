@@ -3,9 +3,13 @@ module cmd/customer-service
 go 1.21.2
 
 require github.com/gorilla/mux v1.8.1
+
 require github.com/jmoiron/sqlx v1.3.5
+
 require github.com/jackc/pgx/v4 v4.18.3
+
 require github.com/joho/godotenv v1.5.1
+require github.com/oklog/ulid/v2 v2.1.0
 
 require (
 	github.com/jackc/chunkreader/v2 v2.0.1 // indirect

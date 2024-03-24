@@ -9,10 +9,10 @@ import (
 
 type CustomerService interface {
 	GetCustomerList() ([]*entity.Customer, error)
-	// GetCustomerByID(customerID string) (*entity.Customer, error)
-	// CreateCustomer(customer entity.Customer) error
-	// UpdateCustomer(customer entity.Customer) error
-	// DeleteCustomerByID(customerID string) error
+	GetCustomerByID(customerID string) (*entity.Customer, error)
+	CreateCustomer(customer entity.Customer) error
+	UpdateCustomer(customer entity.Customer) error
+	DeleteCustomerByID(customerID string) error
 }
 
 type customerService struct {
@@ -35,4 +35,47 @@ func (s *customerService) GetCustomerList() ([]*entity.Customer, error) {
 	}
 
 	return customerList, nil
+}
+
+func (s *customerService) GetCustomerByID(customerID string) (*entity.Customer, error) {
+	s.logger.Debug("Getting customer by ID", "ID", customerID)
+	customer, err := s.customerGtw.GetCustomerByID(customerID)
+	if err != nil {
+		s.logger.Error("Failed to get customer by ID", "error", err)
+		return nil, err
+	}
+
+	return customer, nil
+}
+
+func (s *customerService) CreateCustomer(customer entity.Customer) error {
+	s.logger.Info("Creating new customer", "data", customer)
+	err := s.customerGtw.CreateCustomer(customer)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func (s *customerService) UpdateCustomer(customer entity.Customer) error {
+	s.logger.Info("Updating customer", "data", customer)
+	err := s.customerGtw.UpdateCustomer(customer)
+	if err != nil {
+		s.logger.Error("Failed to update customer by ID", "error", err)
+		return err
+	}
+
+	return nil
+}
+
+func (s *customerService) DeleteCustomerByID(customerID string) error {
+	s.logger.Info("Deleting customer by ID", "ID", customerID)
+	err := s.customerGtw.DeleteCustomerByID(customerID)
+	if err != nil {
+		s.logger.Error("Failed to delete customer by ID", "error", err)
+		return err
+	}
+
+	return nil
 }

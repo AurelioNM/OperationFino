@@ -31,6 +31,12 @@ services:
       - "./observability/grafana:/etc/grafana/provisioning"
       - "of_grafana_vol:/var/lib/grafana/operation-fino"
 
+  of-pyroscope:
+    image: pyroscope/pyroscope:latest
+    ports:
+      - "4040:4040"
+    command: ["server"]
+
 volumes:
   of_customer_postgres_vol: {}
   of_prometheus_vol: {}

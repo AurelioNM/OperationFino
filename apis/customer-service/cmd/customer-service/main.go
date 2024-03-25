@@ -3,6 +3,7 @@ package main
 import (
 	"cmd/customer-service/internal/api"
 	"cmd/customer-service/internal/domain/service"
+	"cmd/customer-service/internal/pyroscope"
 	"cmd/customer-service/internal/resources/database"
 	"fmt"
 	"log"
@@ -18,6 +19,10 @@ import (
 )
 
 func main() {
+	if pyroscope.StartPyroscope() {
+		defer pyroscope.WaitPyroscope()
+	}
+
 	err := godotenv.Load()
 	if err != nil {
 		log.Fatal("Failed to load .env file", "error", err)

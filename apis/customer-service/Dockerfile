@@ -4,6 +4,8 @@ WORKDIR /app
 
 COPY ./bin/customer-service /app
 
+COPY ./.env /app
+
 EXPOSE 8001
 
-CMD [ "./customer-service" ]
+CMD [ "/app/customer-service" ]

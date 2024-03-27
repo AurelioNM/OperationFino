@@ -2,12 +2,14 @@ version: "3.7"
 services:
 
   of-customer-service:
-    buid: ../apis/customer-service/
+    build: ../apis/customer-service/
     container_name: of-customer-service
     ports:
       - "8001:8001"
     environment:
       - DEGUG=true
+    networks:
+      - of-network
 
   of-customer-postgres:
     image: postgres
@@ -21,6 +23,8 @@ services:
     volumes:
       - ../apis/customer-service/db-schema/:/docker-entrypoint-initdb.d/
       - of_customer_postgres_vol:/var/lib/postgresql/data
+    networks:
+      - of-network
 
   of-prometheus:
     image: prom/prometheus
@@ -30,6 +34,8 @@ services:
     volumes:
       - "./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
       - "of_prometheus_vol:/prometheus/customer-service"
+    networks:
+      - of-network
     extra_hosts:
       - "host.docker.internal:host-gateway"
 
@@ -41,6 +47,8 @@ services:
     volumes:
       - "./observability/grafana:/etc/grafana/provisioning"
       - "of_grafana_vol:/var/lib/grafana/operation-fino"
+    networks:
+      - of-network
 
   of-pyroscope:
     image: pyroscope/pyroscope:latest
@@ -48,8 +56,15 @@ services:
     ports:
       - "4040:4040"
     command: ["server"]
+    networks:
+      - of-network
 
 volumes:
   of_customer_postgres_vol: {}
   of_prometheus_vol: {}
   of_grafana_vol: {}
+
+networks:
+  of-network:
+    driver: bridge
+    name: of-network

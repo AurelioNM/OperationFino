@@ -51,7 +51,7 @@ func main() {
 	r.HandleFunc("/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
 	r.HandleFunc("/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")
 
-	logger.Debug("Running customer-service", "port2", os.Getenv("APP_PORT"))
+	logger.Debug("Running customer-service", "port", os.Getenv("APP_PORT"))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r))
 }
 

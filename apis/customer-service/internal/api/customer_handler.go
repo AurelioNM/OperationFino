@@ -63,13 +63,20 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = h.customerSvc.CreateCustomer(customer)
+	id, err := h.customerSvc.CreateCustomer(customer)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
+	responseJson, err := json.Marshal(map[string]*string{"id": id})
+	if err != nil {
+		http.Error(w, "Error marshalling response", http.StatusBadGateway)
+		return
+	}
+
 	w.WriteHeader(http.StatusCreated)
+	w.Write(responseJson)
 }
 
 func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {

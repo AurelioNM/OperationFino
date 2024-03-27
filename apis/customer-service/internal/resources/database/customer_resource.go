@@ -54,21 +54,22 @@ func (g *customerGateway) GetCustomerByID(customerID string) (*entity.Customer, 
 	return &customer, nil
 }
 
-func (g *customerGateway) CreateCustomer(customer entity.Customer) error {
-	g.logger.Debug("Inserting customer into db", "email", customer.Email, "birthdate", customer.Birthdate.Format(time.DateOnly))
+func (g *customerGateway) CreateCustomer(customer entity.Customer) (*string, error) {
+	g.logger.Debug("Inserting customer into db", "email", customer.Email)
 
+	id := ulid.Make().String()
 	_, err := g.db.Exec(`INSERT INTO customers (customer_id, name, surname, email, birthdate, created_at) VALUES ($1, $2, $3, $4, $5, 'NOW()');`,
-		ulid.Make().String(),
+		id,
 		customer.Name,
-		customer.Surname, 
+		customer.Surname,
 		customer.Email,
 		customer.Birthdate.Format(time.DateOnly))
 	if err != nil {
 		g.logger.Error("Failed to insert customer into db", "error", err)
-		return err
+		return nil, err
 	}
 
-	return nil
+	return &id, nil
 }
 
 func (g *customerGateway) UpdateCustomer(customer entity.Customer) error {

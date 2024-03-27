@@ -10,7 +10,7 @@ import (
 type CustomerService interface {
 	GetCustomerList() ([]*entity.Customer, error)
 	GetCustomerByID(customerID string) (*entity.Customer, error)
-	CreateCustomer(customer entity.Customer) error
+	CreateCustomer(customer entity.Customer) (*string, error)
 	UpdateCustomer(customer entity.Customer) error
 	DeleteCustomerByID(customerID string) error
 }
@@ -48,14 +48,14 @@ func (s *customerService) GetCustomerByID(customerID string) (*entity.Customer, 
 	return customer, nil
 }
 
-func (s *customerService) CreateCustomer(customer entity.Customer) error {
+func (s *customerService) CreateCustomer(customer entity.Customer) (*string, error) {
 	s.logger.Info("Creating new customer", "data", customer)
-	err := s.customerGtw.CreateCustomer(customer)
+	id, err := s.customerGtw.CreateCustomer(customer)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	return nil
+	return id, nil
 }
 
 func (s *customerService) UpdateCustomer(customer entity.Customer) error {

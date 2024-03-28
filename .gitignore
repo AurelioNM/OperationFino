@@ -2,8 +2,9 @@
 # https://github.com/github/gitignore/blob/main/community/Golang/Go.AllowList.gitignore
 #
 *application.yaml
+**/bin/
 # Binaries for programs and plugins
-*.exe
+*.env
 *.exe~
 *.dll
 *.so

@@ -1,10 +1,9 @@
 apiVersion: 1
 
 datasources:
-  - name: Cortex
+  - name: Of-Prometheus
     type: prometheus
-    url: http://host.docker.internal:9090
-    uuid: P2839931824444
+    url: http://of-prometheus:9090
     isDefault: true
     access: proxy
     editable: true

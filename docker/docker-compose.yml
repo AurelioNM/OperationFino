@@ -45,7 +45,8 @@ services:
     ports:
       - "3010:3000"
     volumes:
-      - "./observability/grafana:/etc/grafana/provisioning"
+      - "./observability/grafana/datasources:/etc/grafana/provisioning/datasources"
+      - "./observability/grafana/dashboards:/etc/grafana/provisioning/dashboards"
       - "of_grafana_vol:/var/lib/grafana/operation-fino"
     networks:
       - of-network

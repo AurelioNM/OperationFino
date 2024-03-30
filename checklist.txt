@@ -1,0 +1,16 @@
+.go Context
+.Common logs - clonar tds common go
+.Observabilidade
+	- gerar metricas
+	- configurar prometheus
+	- dashboard grafana
+.Resiliencia
+	- Circuit Break
+	- getByID caching
+	- Nginx
+.Test
+	- Unit test
+	- Vegeta
+	- Robot
+	- Mutation test
+	- Contract test

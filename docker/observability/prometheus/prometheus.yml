@@ -9,7 +9,7 @@ scrape_configs:
 
   - job_name: 'of-customer-service'
     static_configs:
-      - targets: ['host.docker.internal:9090']
+      - targets: ['of-prometheus:9090']
         labels:
           service: 'of-customer-service'
           instancee: 'of-customer-service-local'

@@ -38,7 +38,7 @@ func (s *customerService) GetCustomerList() ([]*entity.Customer, error) {
 }
 
 func (s *customerService) GetCustomerByID(customerID string) (*entity.Customer, error) {
-	s.logger.Debug("Getting customer by ID", "ID", customerID)
+	s.logger.Info("Getting customer by ID", "ID", customerID)
 	customer, err := s.customerGtw.GetCustomerByID(customerID)
 	if err != nil {
 		s.logger.Error("Failed to get customer by ID", "error", err)

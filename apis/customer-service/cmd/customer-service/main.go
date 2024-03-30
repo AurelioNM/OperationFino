@@ -33,8 +33,6 @@ func main() {
 		Level: slog.LevelDebug,
 	}))
 
-	r.Use(loggingMiddleware(logger))
-
 	db, err := database.CreateDBConnPool(*logger)
 	if err != nil {
 		logger.Error("Error creating DB", "error", err)
@@ -53,14 +51,4 @@ func main() {
 
 	logger.Debug("Running customer-service", "port", os.Getenv("APP_PORT"))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r))
-}
-
-func loggingMiddleware(logger *slog.Logger) func(next http.Handler) http.Handler {
-	return func(next http.Handler) http.Handler {
-		return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-			logger.Debug(fmt.Sprintf("Recieved request %s %s", r.Method, r.URL.Path))
-			// Call the next handler
-			next.ServeHTTP(w, r)
-		})
-	}
 }

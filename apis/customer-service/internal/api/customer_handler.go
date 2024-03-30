@@ -32,6 +32,7 @@ func NewCustomerHandler(l slog.Logger, s service.CustomerService) CustomerHandle
 }
 
 func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
+	h.logger.Debug("GET customers request")
 	customers, err := h.customerSvc.GetCustomerList()
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusBadRequest)
@@ -42,6 +43,7 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
+	h.logger.Debug("GET customer by ID request")
 	vars := mux.Vars(r)
 	id := vars["id"]
 
@@ -55,6 +57,7 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
+	h.logger.Debug("POST customer request")
 	var customer entity.Customer
 	err := json.NewDecoder(r.Body).Decode(&customer)
 	if err != nil {
@@ -80,6 +83,7 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
+	h.logger.Debug("PUT customer by ID request")
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var customer entity.Customer
@@ -100,6 +104,7 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 }
 
 func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
+	h.logger.Debug("DELETE customer by ID request")
 	vars := mux.Vars(r)
 	id := vars["id"]
 

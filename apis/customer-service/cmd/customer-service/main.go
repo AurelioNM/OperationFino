@@ -3,6 +3,7 @@ package main
 import (
 	"cmd/customer-service/internal/api"
 	"cmd/customer-service/internal/domain/service"
+	"cmd/customer-service/internal/metrics"
 	"cmd/customer-service/internal/pyroscope"
 	"cmd/customer-service/internal/resources/database"
 	"fmt"
@@ -16,6 +17,9 @@ import (
 	_ "github.com/jackc/pgx/v4"
 	_ "github.com/jackc/pgx/v4/stdlib"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 func main() {
@@ -39,9 +43,20 @@ func main() {
 		return
 	}
 
+	// METRICS
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(collectors.NewGoCollector())
+
+	metrics := metrics.NewCustomerMetrics(*logger, reg)
+
+	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
+
+	r.HandleFunc("/metrics", promHandler.ServeHTTP).Methods("GET")
+	// METRICS
+
 	customerGtw := database.NewCustomerGateway(*logger, db.DB)
 	customerSvc := service.NewCustomerService(*logger, customerGtw)
-	customerHandler := api.NewCustomerHandler(*logger, customerSvc)
+	customerHandler := api.NewCustomerHandler(*logger, metrics, customerSvc)
 
 	r.HandleFunc("/customers", customerHandler.GetCustomers).Methods("GET")
 	r.HandleFunc("/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")

@@ -3,6 +3,7 @@ package api
 import (
 	"cmd/customer-service/internal/domain/entity"
 	"cmd/customer-service/internal/domain/service"
+	"cmd/customer-service/internal/metrics"
 	"encoding/json"
 	"net/http"
 
@@ -21,12 +22,14 @@ type CustomerHandler interface {
 
 type customerHandler struct {
 	logger      slog.Logger
+	metrics     *metrics.CustomerMetrics
 	customerSvc service.CustomerService
 }
 
-func NewCustomerHandler(l slog.Logger, s service.CustomerService) CustomerHandler {
+func NewCustomerHandler(l slog.Logger, m *metrics.CustomerMetrics, s service.CustomerService) CustomerHandler {
 	return &customerHandler{
 		logger:      *l.With("layer", "customer-handler"),
+		metrics:     m,
 		customerSvc: s,
 	}
 }
@@ -39,6 +42,7 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.metrics.SetTotalCustomers(len(customers))
 	json.NewEncoder(w).Encode(customers)
 }
 
@@ -78,6 +82,7 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	h.metrics.IncreaseTotalCustomers()
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseJson)
 }

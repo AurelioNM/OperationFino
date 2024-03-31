@@ -3,7 +3,7 @@ import { check } from 'k6';
 
 export const options = {
 	vus: 1,
-	duration: '2s',
+	duration: '3s',
 };
 
 function randomString(length, charset = '') {

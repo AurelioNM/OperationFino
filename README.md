@@ -15,7 +15,7 @@
 	- [x] generate metricas
 	- [x] config prometheus
 	- [ ] create grafana dashboards
-.Testing
+- Testing
 	- [x] k6 - load test
 	- [ ] k6 - test transactional flow
 	- [ ] Unit test

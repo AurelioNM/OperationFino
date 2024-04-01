@@ -12,9 +12,10 @@
 - [ ] swagger
 - Observability
     - [x] logs
-	- [x] generate metricas
+	- [x] generate metrics
 	- [x] config prometheus
-	- [ ] create grafana dashboards
+	- [x] create basic grafana dashboards
+	- [ ] improve dashboards
 - Testing
 	- [x] k6 - load test
 	- [ ] k6 - test transactional flow

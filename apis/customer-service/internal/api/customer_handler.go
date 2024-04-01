@@ -6,10 +6,12 @@ import (
 	"cmd/customer-service/internal/metrics"
 	"encoding/json"
 	"net/http"
+	"time"
 
 	"log/slog"
 
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 )
 
 type CustomerHandler interface {
@@ -35,6 +37,7 @@ func NewCustomerHandler(l slog.Logger, m *metrics.CustomerMetrics, s service.Cus
 }
 
 func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
 	h.logger.Debug("GET customers request")
 	customers, err := h.customerSvc.GetCustomerList()
 	if err != nil {
@@ -43,10 +46,14 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 	}
 
 	h.metrics.SetTotalCustomers(len(customers))
+	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.SummaryDuration.Observe(time.Since(now).Seconds())
+
 	json.NewEncoder(w).Encode(customers)
 }
 
 func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
 	h.logger.Debug("GET customer by ID request")
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -57,10 +64,12 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
+	h.metrics.Duration.With(prometheus.Labels{"method": "GET by id", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
 	json.NewEncoder(w).Encode(customer)
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
 	h.logger.Debug("POST customer request")
 	var customer entity.Customer
 	err := json.NewDecoder(r.Body).Decode(&customer)
@@ -83,11 +92,14 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 	}
 
 	h.metrics.IncreaseTotalCustomers()
+	h.metrics.Duration.With(prometheus.Labels{"method": "POST", "status": "201"}).Observe(float64(time.Since(now).Seconds()))
+
 	w.WriteHeader(http.StatusCreated)
 	w.Write(responseJson)
 }
 
 func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
 	h.logger.Debug("PUT customer by ID request")
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -105,10 +117,14 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	h.metrics.IncreaseUpdateOnCustomers()
+	h.metrics.Duration.With(prometheus.Labels{"method": "PUT", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
+
 	w.WriteHeader(http.StatusOK)
 }
 
 func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
 	h.logger.Debug("DELETE customer by ID request")
 	vars := mux.Vars(r)
 	id := vars["id"]
@@ -119,5 +135,6 @@ func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	h.metrics.Duration.With(prometheus.Labels{"method": "DELETE", "status": "204"}).Observe(float64(time.Since(now).Seconds()))
 	w.WriteHeader(http.StatusNoContent)
 }

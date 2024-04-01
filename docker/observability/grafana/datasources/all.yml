@@ -4,6 +4,7 @@ datasources:
   - name: Of-Prometheus
     type: prometheus
     url: http://of-prometheus:9090
+    uid: P685884848CB9
     isDefault: true
     access: proxy
     editable: true

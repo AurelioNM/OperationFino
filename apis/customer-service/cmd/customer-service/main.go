@@ -55,11 +55,11 @@ func main() {
 	customerHandler := api.NewCustomerHandler(*logger, metrics, customerSvc)
 
 	r.HandleFunc("/metrics", promHandler.ServeHTTP).Methods("GET")
-	r.HandleFunc("/customers", customerHandler.GetCustomers).Methods("GET")
-	r.HandleFunc("/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")
-	r.HandleFunc("/customers", customerHandler.CreateCustomer).Methods("POST")
-	r.HandleFunc("/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
-	r.HandleFunc("/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")
+	r.HandleFunc("/v1/customers", customerHandler.GetCustomers).Methods("GET")
+	r.HandleFunc("/v1/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")
+	r.HandleFunc("/v1/customers", customerHandler.CreateCustomer).Methods("POST")
+	r.HandleFunc("/v1/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
+	r.HandleFunc("/v1/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")
 
 	logger.Debug("Running customer-service", "port", os.Getenv("APP_PORT"))
 	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r))

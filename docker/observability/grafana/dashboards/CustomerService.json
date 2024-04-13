@@ -177,11 +177,7 @@
       "id": 3,
       "options": {
         "legend": {
-          "calcs": [
-            "max",
-            "lastNotNull",
-            "sum"
-          ],
+          "calcs": ["max", "lastNotNull", "sum"],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -273,7 +269,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "DELETE /customers/{customerId}"
+              "options": "DELETE /v1/customers/{customerId}"
             },
             "properties": [
               {
@@ -288,7 +284,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "POST /customers"
+              "options": "POST /v1/customers"
             },
             "properties": [
               {
@@ -303,7 +299,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "GET /customers/{customerId}"
+              "options": "GET /v1/customers/{customerId}"
             },
             "properties": [
               {
@@ -318,7 +314,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "GET /customers"
+              "options": "GET /v1/customers"
             },
             "properties": [
               {
@@ -333,7 +329,7 @@
           {
             "matcher": {
               "id": "byName",
-              "options": "PUT /customers/{customerId}"
+              "options": "PUT /v1/customers/{customerId}"
             },
             "properties": [
               {
@@ -356,11 +352,7 @@
       "id": 4,
       "options": {
         "legend": {
-          "calcs": [
-            "lastNotNull",
-            "min",
-            "max"
-          ],
+          "calcs": ["lastNotNull", "min", "max"],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true

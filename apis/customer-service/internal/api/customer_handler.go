@@ -47,7 +47,7 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 
 	h.metrics.SetTotalCustomers(len(customers))
 	h.metrics.IncreaseRequestsByStatusCode("200")
-	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "uri": "/customers", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "uri": "/v1/customers", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
 	h.metrics.SummaryDuration.Observe(time.Since(now).Seconds())
 
 	json.NewEncoder(w).Encode(customers)
@@ -65,7 +65,7 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "uri": "/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "uri": "/v1/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
 	h.metrics.IncreaseRequestsByStatusCode("200")
 	json.NewEncoder(w).Encode(customer)
 }
@@ -93,7 +93,7 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "POST", "uri": "/customers", "status": "201"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.Duration.With(prometheus.Labels{"method": "POST", "uri": "/v1/customers", "status": "201"}).Observe(float64(time.Since(now).Seconds()))
 	h.metrics.IncreaseTotalCustomers()
 	h.metrics.IncreaseRequestsByStatusCode("201")
 
@@ -121,7 +121,7 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "PUT", "uri": "/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.Duration.With(prometheus.Labels{"method": "PUT", "uri": "/v1/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
 	h.metrics.IncreaseRequestsByStatusCode("200")
 
 	w.WriteHeader(http.StatusOK)
@@ -139,7 +139,7 @@ func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "DELETE", "uri": "/customers/{customerId}", "status": "204"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.Duration.With(prometheus.Labels{"method": "DELETE", "uri": "/v1/customers/{customerId}", "status": "204"}).Observe(float64(time.Since(now).Seconds()))
 	h.metrics.IncreaseRequestsByStatusCode("204")
 	w.WriteHeader(http.StatusNoContent)
 }

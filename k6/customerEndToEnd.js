@@ -28,7 +28,7 @@ function generateJson() {
 }
 
 export default function() {
-	let url = "http://127.0.0.1:8001/customers"
+	let url = "http://127.0.0.1:8001/v1/customers"
 	const params = {
 		headers: {
 			'Content-Type': 'application/json',

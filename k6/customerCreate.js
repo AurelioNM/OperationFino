@@ -14,7 +14,7 @@ function randomString(length, charset = '') {
 }
 
 export default function() {
-	const url = "http://127.0.0.1:8001/customers"
+	const url = "http://127.0.0.1:8001/v1/customers"
 	const params = {
 		headers: {
 			'Content-Type': 'application/json',

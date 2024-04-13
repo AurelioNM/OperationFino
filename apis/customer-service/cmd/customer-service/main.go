@@ -33,6 +33,7 @@ func main() {
 	}
 
 	r := mux.NewRouter()
+
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
@@ -43,6 +44,7 @@ func main() {
 		return
 	}
 
+	// METRICS
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(collectors.NewGoCollector())
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})

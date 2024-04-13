@@ -7,13 +7,13 @@ import (
 )
 
 type CustomerMetrics struct {
-	logger            slog.Logger
-	Version           string
-	AppInfo           *prometheus.GaugeVec
-	TotalCustomers    prometheus.Gauge
-	UpdateOnCustomers *prometheus.CounterVec
-	Duration          *prometheus.HistogramVec
-	SummaryDuration   prometheus.Summary
+	logger          slog.Logger
+	Version         string
+	AppInfo         *prometheus.GaugeVec
+	TotalCustomers  prometheus.Gauge
+	ReqByStatusCode *prometheus.CounterVec
+	Duration        *prometheus.HistogramVec
+	SummaryDuration prometheus.Summary
 }
 
 func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetrics {
@@ -31,17 +31,17 @@ func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetri
 			Namespace: namespace,
 			Name:      "total_customers",
 			Help:      "Number of customers on DB"}),
-		UpdateOnCustomers: prometheus.NewCounterVec(prometheus.CounterOpts{
+		ReqByStatusCode: prometheus.NewCounterVec(prometheus.CounterOpts{
 			Namespace: namespace,
 			Name:      "total_customers_update",
 			Help:      "Number of upgraded devices"},
-			[]string{"type"}),
+			[]string{"status"}),
 		Duration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 			Namespace: namespace,
 			Name:      "request_duration_seconds",
 			Help:      "Duration of request",
 			Buckets:   []float64{0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0}},
-			[]string{"status", "method"}),
+			[]string{"status", "method", "uri"}),
 		SummaryDuration: prometheus.NewSummary(prometheus.SummaryOpts{
 			Namespace:  namespace,
 			Name:       "request_summary_duration_seconds",
@@ -52,7 +52,7 @@ func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetri
 
 	m.AppInfo.With(prometheus.Labels{"version": m.Version}).Set(1)
 
-	reg.MustRegister(m.TotalCustomers, m.AppInfo, m.UpdateOnCustomers, m.Duration)
+	reg.MustRegister(m.TotalCustomers, m.AppInfo, m.ReqByStatusCode, m.Duration)
 	return m
 }
 
@@ -64,6 +64,6 @@ func (m *CustomerMetrics) IncreaseTotalCustomers() {
 	m.TotalCustomers.Inc()
 }
 
-func (m *CustomerMetrics) IncreaseUpdateOnCustomers() {
-	m.UpdateOnCustomers.With(prometheus.Labels{"type": "router"}).Inc()
+func (m *CustomerMetrics) IncreaseRequestsByStatusCode(status string) {
+	m.ReqByStatusCode.With(prometheus.Labels{"status": status}).Inc()
 }

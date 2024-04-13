@@ -16,17 +16,18 @@
 	- [x] config prometheus
 	- [x] create basic grafana dashboards
 	- [ ] improve dashboards
-	    - [ ] Transformar dash de Update-Req;
+	    - [x] transform Update-Req dashboard into RequestsByStatusCode
 - Testing
-	- [x] k6 - load test
-	- [ ] k6 - test transactional flow
+	- [x] k6
+	    - [x] basic load tests
+	    - [x] test end to end apis
 	- [ ] Unit test
 	- [ ] Vegeta
 	- [ ] Robot
 	- [ ] Mutation test
 	- [ ] Contract test
 - Resilience
+	- [ ] Cache
 	- [ ] Circuit Break
-	- [ ] getByID caching
 	- [ ] Nginx
 

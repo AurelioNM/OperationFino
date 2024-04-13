@@ -1,19 +1,15 @@
 import http from 'k6/http';
 import { check } from 'k6';
 
-// export const options = {
-// 	stages: [
-// 		{ duration: '100s', target: 1},
-// 		{ duration: '200s', target: 2},
-// 		{ duration: '300s', target: 3},
-// 		{ duration: '400s', target: 4},
-// 		{ duration: '500s', target: 5},
-// 	]
-// }
 export const options = {
-	vus: 1,
-	duration: '1000s',
-};
+	stages: [
+		{ duration: '50s', target: 1},
+		{ duration: '100s', target: 2},
+		{ duration: '150s', target: 3},
+		{ duration: '200s', target: 4},
+		{ duration: '250s', target: 5},
+	]
+}
 
 function generateRandomString(length, charset = '') {
 	if (!charset) charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'

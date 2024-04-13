@@ -16,6 +16,7 @@
 	- [x] config prometheus
 	- [x] create basic grafana dashboards
 	- [ ] improve dashboards
+	    - [ ] Transformar dash de Update-Req;
 - Testing
 	- [x] k6 - load test
 	- [ ] k6 - test transactional flow
@@ -28,3 +29,4 @@
 	- [ ] Circuit Break
 	- [ ] getByID caching
 	- [ ] Nginx
+

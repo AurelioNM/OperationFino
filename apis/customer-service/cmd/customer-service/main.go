@@ -43,21 +43,16 @@ func main() {
 		return
 	}
 
-	// METRICS
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(collectors.NewGoCollector())
-
-	metrics := metrics.NewCustomerMetrics(*logger, reg)
-
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
 
-	r.HandleFunc("/metrics", promHandler.ServeHTTP).Methods("GET")
-	// METRICS
-
+	metrics := metrics.NewCustomerMetrics(*logger, reg)
 	customerGtw := database.NewCustomerGateway(*logger, db.DB)
 	customerSvc := service.NewCustomerService(*logger, customerGtw)
 	customerHandler := api.NewCustomerHandler(*logger, metrics, customerSvc)
 
+	r.HandleFunc("/metrics", promHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/customers", customerHandler.GetCustomers).Methods("GET")
 	r.HandleFunc("/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")
 	r.HandleFunc("/customers", customerHandler.CreateCustomer).Methods("POST")

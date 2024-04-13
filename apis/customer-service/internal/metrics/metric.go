@@ -40,7 +40,7 @@ func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetri
 			Namespace: namespace,
 			Name:      "request_duration_seconds",
 			Help:      "Duration of request",
-			Buckets:   []float64{0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0}},
+			Buckets:   []float64{0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0}},
 			[]string{"status", "method"}),
 		SummaryDuration: prometheus.NewSummary(prometheus.SummaryOpts{
 			Namespace:  namespace,
@@ -52,7 +52,7 @@ func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetri
 
 	m.AppInfo.With(prometheus.Labels{"version": m.Version}).Set(1)
 
-	reg.MustRegister(m.TotalCustomers, m.AppInfo, m.UpdateOnCustomers, m.Duration, m.SummaryDuration)
+	reg.MustRegister(m.TotalCustomers, m.AppInfo, m.UpdateOnCustomers, m.Duration)
 	return m
 }
 

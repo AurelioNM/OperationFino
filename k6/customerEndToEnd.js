@@ -3,11 +3,10 @@ import { check } from 'k6';
 
 export const options = {
 	stages: [
-		// { duration: '2m', target: 1},
-		// { duration: '3m', target: 2},
-		// { duration: '4m', target: 3},
-		// { duration: '10m', target: 2},
-		{ duration: '1m', target: 1},
+		{ duration: '2m', target: 1},
+		{ duration: '3m', target: 2},
+		{ duration: '4m', target: 3},
+		{ duration: '10m', target: 4},
 	]
 }
 
@@ -40,7 +39,7 @@ export default function() {
 	check(createResponse, {
 		'create status 201': (r) => r.status === 201
 	})
-	const createdId = createResponse.json().id
+	const createdId = createResponse.json().data.id
 	url = `${url}/${createdId}`
 
 	// GET
@@ -62,6 +61,6 @@ export default function() {
 	// DELETE
 	const deleteResponse = http.del(url)
 	check(deleteResponse, {
-		'get status 204': (r) => r.status === 204
+		'delete status 200': (r) => r.status === 200
 	})
 }

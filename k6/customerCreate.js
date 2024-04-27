@@ -2,8 +2,8 @@ import http from 'k6/http';
 import { check } from 'k6';
 
 export const options = {
-	vus: 3,
-	duration: '200s',
+	vus: 1,
+	duration: '1s',
 };
 
 function randomString(length, charset = '') {

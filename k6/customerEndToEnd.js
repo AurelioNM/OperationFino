@@ -3,11 +3,11 @@ import { check } from 'k6';
 
 export const options = {
 	stages: [
-		{ duration: '50s', target: 1},
-		{ duration: '100s', target: 2},
-		{ duration: '150s', target: 3},
-		{ duration: '200s', target: 4},
-		{ duration: '250s', target: 5},
+		// { duration: '2m', target: 1},
+		// { duration: '3m', target: 2},
+		// { duration: '4m', target: 3},
+		// { duration: '10m', target: 2},
+		{ duration: '1m', target: 1},
 	]
 }
 

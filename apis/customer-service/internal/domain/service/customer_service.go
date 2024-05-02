@@ -3,16 +3,17 @@ package service
 import (
 	"cmd/customer-service/internal/domain/entity"
 	"cmd/customer-service/internal/domain/gateway"
+	"context"
 
 	"log/slog"
 )
 
 type CustomerService interface {
-	GetCustomerList() ([]*entity.Customer, error)
-	GetCustomerByID(customerID string) (*entity.Customer, error)
-	CreateCustomer(customer entity.Customer) (*string, error)
-	UpdateCustomer(customer entity.Customer) error
-	DeleteCustomerByID(customerID string) error
+	GetCustomerList(ctx context.Context) ([]*entity.Customer, error)
+	GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
+	CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error)
+	UpdateCustomer(ctx context.Context, customer entity.Customer) error
+	DeleteCustomerByID(ctx context.Context, customerID string) error
 }
 
 type customerService struct {
@@ -27,9 +28,9 @@ func NewCustomerService(l slog.Logger, c gateway.CustomerGateway) CustomerServic
 	}
 }
 
-func (s *customerService) GetCustomerList() ([]*entity.Customer, error) {
-	s.logger.Info("Getting all customers")
-	customerList, err := s.customerGtw.GetCustomerList()
+func (s *customerService) GetCustomerList(ctx context.Context) ([]*entity.Customer, error) {
+	s.logger.Info("Getting all customers", "traceID", ctx.Value("traceID"))
+	customerList, err := s.customerGtw.GetCustomerList(ctx)
 	if err != nil {
 		return nil, err
 	}
@@ -37,43 +38,44 @@ func (s *customerService) GetCustomerList() ([]*entity.Customer, error) {
 	return customerList, nil
 }
 
-func (s *customerService) GetCustomerByID(customerID string) (*entity.Customer, error) {
-	s.logger.Info("Getting customer by ID", "ID", customerID)
-	customer, err := s.customerGtw.GetCustomerByID(customerID)
+func (s *customerService) GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error) {
+	s.logger.Info("Getting customer by ID", "ID", customerID, "traceID", ctx.Value("traceID"))
+	customer, err := s.customerGtw.GetCustomerByID(ctx, customerID)
 	if err != nil {
-		s.logger.Error("Failed to get customer by ID", "error", err)
+		s.logger.Error("Failed to get customer by ID", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
 
 	return customer, nil
 }
 
-func (s *customerService) CreateCustomer(customer entity.Customer) (*string, error) {
-	s.logger.Info("Creating new customer", "data", customer)
-	id, err := s.customerGtw.CreateCustomer(customer)
+func (s *customerService) CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error) {
+	s.logger.Info("Creating new customer", "data", customer, "traceID", ctx.Value("traceID"))
+	id, err := s.customerGtw.CreateCustomer(ctx, customer)
 	if err != nil {
+		s.logger.Error("Failed to create customer", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
 
 	return id, nil
 }
 
-func (s *customerService) UpdateCustomer(customer entity.Customer) error {
+func (s *customerService) UpdateCustomer(ctx context.Context, customer entity.Customer) error {
 	s.logger.Info("Updating customer", "data", customer)
-	err := s.customerGtw.UpdateCustomer(customer)
+	err := s.customerGtw.UpdateCustomer(ctx, customer)
 	if err != nil {
-		s.logger.Error("Failed to update customer by ID", "error", err)
+		s.logger.Error("Failed to update customer by ID", "error", err, "traceID", ctx.Value("traceID"))
 		return err
 	}
 
 	return nil
 }
 
-func (s *customerService) DeleteCustomerByID(customerID string) error {
+func (s *customerService) DeleteCustomerByID(ctx context.Context, customerID string) error {
 	s.logger.Info("Deleting customer by ID", "ID", customerID)
-	err := s.customerGtw.DeleteCustomerByID(customerID)
+	err := s.customerGtw.DeleteCustomerByID(ctx, customerID)
 	if err != nil {
-		s.logger.Error("Failed to delete customer by ID", "error", err)
+		s.logger.Error("Failed to delete customer by ID", "error", err, "traceID", ctx.Value("traceID"))
 		return err
 	}
 

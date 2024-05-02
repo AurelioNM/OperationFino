@@ -4,6 +4,7 @@ import (
 	"cmd/customer-service/internal/domain/entity"
 	"cmd/customer-service/internal/domain/service"
 	"cmd/customer-service/internal/metrics"
+	"context"
 	"encoding/json"
 	"fmt"
 	"net/http"
@@ -12,6 +13,7 @@ import (
 	"log/slog"
 
 	"github.com/gorilla/mux"
+	"github.com/oklog/ulid/v2"
 	"github.com/prometheus/client_golang/prometheus"
 )
 
@@ -46,8 +48,10 @@ func NewCustomerHandler(l slog.Logger, m *metrics.CustomerMetrics, s service.Cus
 
 func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	h.logger.Debug("GET customers request")
-	customers, err := h.customerSvc.GetCustomerList()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET all customers request", "traceID", ctx.Value("traceID"))
+
+	customers, err := h.customerSvc.GetCustomerList(ctx)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "getAll", time.Since(now))
 		return
@@ -63,11 +67,13 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 
 func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	h.logger.Debug("GET customer by ID request")
+	ctx := h.getContext(r)
+	h.logger.Debug("GET customer by ID request", "traceID", ctx.Value("traceID"))
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	customer, err := h.customerSvc.GetCustomerByID(id)
+	customer, err := h.customerSvc.GetCustomerByID(ctx, id)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "getByID", time.Since(now))
 		return
@@ -81,7 +87,9 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	h.logger.Debug("POST customer request")
+	ctx := h.getContext(r)
+	h.logger.Debug("POST customer request", "traceID", ctx.Value("traceID"))
+
 	var customer entity.Customer
 	err := json.NewDecoder(r.Body).Decode(&customer)
 	if err != nil {
@@ -89,7 +97,7 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	id, err := h.customerSvc.CreateCustomer(customer)
+	id, err := h.customerSvc.CreateCustomer(ctx, customer)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "create", time.Since(now))
 		return
@@ -106,7 +114,9 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 
 func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	h.logger.Debug("PUT customer by ID request")
+	ctx := h.getContext(r)
+	h.logger.Debug("PUT customer by ID request", "traceID", ctx.Value("traceID"))
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 	var customer entity.Customer
@@ -118,7 +128,7 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 	}
 	customer.ID = &id
 
-	err = h.customerSvc.UpdateCustomer(customer)
+	err = h.customerSvc.UpdateCustomer(ctx, customer)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "update", time.Since(now))
 		return
@@ -132,20 +142,32 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 
 func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
 	now := time.Now()
-	h.logger.Debug("DELETE customer by ID request")
+	ctx := h.getContext(r)
+	h.logger.Debug("DELETE customer by ID request", "traceID", ctx.Value("traceID"))
+
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	err := h.customerSvc.DeleteCustomerByID(id)
+	err := h.customerSvc.DeleteCustomerByID(ctx, id)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "delete", time.Since(now))
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "DELETE", "uri": "/v1/customers/{customerId}", "status": "204"}).Observe(float64(time.Since(now).Seconds()))
-	h.metrics.IncreaseRequestsByStatusCode("204")
+	h.metrics.Duration.With(prometheus.Labels{"method": "DELETE", "uri": "/v1/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
+	h.metrics.IncreaseRequestsByStatusCode("200")
 
 	h.buildResponse(w, "Customer deleted", time.Since(now), map[string]interface{}{})
+}
+
+func (h *customerHandler) getContext(r *http.Request) context.Context {
+	traceID := r.Header.Get("X-Trace-ID")
+	if traceID == "" {
+		traceID = ulid.Make().String()
+	}
+
+	ctx := context.WithValue(r.Context(), "traceID", traceID)
+	return ctx
 }
 
 func (h *customerHandler) buildResponse(w http.ResponseWriter, message string, elapsedTime time.Duration, data map[string]interface{}) {

@@ -7,9 +7,9 @@
 - [x] config docker
 - [x] config pyroscope
 - [x] layers handler, service, resources
-- [ ] profiling
-- [ ] go Context
+- [x] go Context
 - [ ] swagger
+- [ ] profiling
 - Observability
     - [x] logs
 	- [x] generate metrics
@@ -17,6 +17,8 @@
 	- [x] create basic grafana dashboards
 	- [ ] improve dashboards
 	    - [x] transform Update-Req dashboard into RequestsByStatusCode
+	    - [ ] add total reqs dashboard
+	    - [ ] add error rate dashboard
 - Testing
 	- [x] k6
 	    - [x] basic load tests

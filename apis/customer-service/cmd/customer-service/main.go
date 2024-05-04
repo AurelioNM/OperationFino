@@ -10,6 +10,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
 
 	"log/slog"
 
@@ -61,6 +63,12 @@ func main() {
 	r.HandleFunc("/v1/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")
 
-	logger.Debug("Running customer-service", "port", os.Getenv("APP_PORT"))
-	log.Fatal(http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r))
+	logger.Debug("Starting customer-service", "port", os.Getenv("APP_PORT"))
+	go http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r)
+
+	quitChannel := make(chan os.Signal, 1)
+	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
+	<-quitChannel
+
+	logger.Debug("Stoping customer-service")
 }

@@ -10,16 +10,15 @@ import (
 
 	"log/slog"
 
-	"github.com/jmoiron/sqlx"
 	"github.com/oklog/ulid/v2"
 )
 
 type customerGateway struct {
 	logger slog.Logger
-	db     *sqlx.DB
+	db     *sql.DB
 }
 
-func NewCustomerGateway(l slog.Logger, db *sqlx.DB) gateway.CustomerGateway {
+func NewCustomerGateway(l slog.Logger, db *sql.DB) gateway.CustomerGateway {
 	return &customerGateway{
 		logger: *l.With("layer", "customer-gateway"),
 		db:     db,
@@ -28,12 +27,24 @@ func NewCustomerGateway(l slog.Logger, db *sqlx.DB) gateway.CustomerGateway {
 
 func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Customer, error) {
 	g.logger.Debug("Getting all customers from db", "traceID", ctx.Value("traceID"))
-	customers := []*entity.Customer{}
+	query := "SELECT customer_ID, name, surname, email FROM customers;"
 
-	err := g.db.Select(&customers, "SELECT customer_ID, name, surname, email FROM customers;")
+	rows, err := g.db.Query(query)
 	if err != nil {
 		g.logger.Error("Failed to get customers from db", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
+	}
+
+	defer rows.Close()
+	customers := make([]*entity.Customer, 0)
+	for rows.Next() {
+		customer := &entity.Customer{}
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email)
+		if err != nil {
+			g.logger.Error("Error scaning row", "error", err)
+			return nil, err
+		}
+		customers = append(customers, customer)
 	}
 
 	return customers, nil
@@ -41,18 +52,25 @@ func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Custom
 
 func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error) {
 	g.logger.Debug("Getting customer by ID from db", "ID", customerID, "traceID", ctx.Value("traceID"))
-	customer := entity.Customer{}
+	query := "SELECT customer_id, name, surname, email FROM customers WHERE customer_id = $1;"
 
-	err := g.db.Get(&customer, `SELECT customer_id, name, surname, email FROM customers WHERE customer_id = $1;`, customerID)
-	if err == sql.ErrNoRows {
-		return nil, fmt.Errorf("No customer found ID=%s", customerID)
-	}
+	rows, err := g.db.Query(query, customerID)
 	if err != nil {
 		g.logger.Error("Failed to get customer by ID from db", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
 
-	return &customer, nil
+	for rows.Next() {
+		customer := entity.Customer{}
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email)
+		if err != nil {
+			g.logger.Error("Error scaning row", "error", err)
+			return nil, err
+		}
+		return &customer, nil
+	}
+
+	return nil, fmt.Errorf("No customer found ID=%s", customerID)
 }
 
 func (g *customerGateway) CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error) {

@@ -6,7 +6,6 @@ import (
 	"cmd/customer-service/internal/metrics"
 	"cmd/customer-service/internal/pyroscope"
 	"cmd/customer-service/internal/resources/database"
-	"cmd/customer-service/internal/resources/database2"
 	"fmt"
 	"log"
 	"net/http"
@@ -40,12 +39,6 @@ func main() {
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
-
-	_, err = database2.CreateDBConnPool(*logger)
-	if err != nil {
-		logger.Error("Error creating DB2", "error", err)
-		return
-	}
 
 	db, err := database.CreateDBConnPool(*logger)
 	if err != nil {

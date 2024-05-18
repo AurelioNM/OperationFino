@@ -5,32 +5,18 @@ import (
 	"context"
 	"log/slog"
 	"os"
+	"reflect"
 	"testing"
 	"time"
 
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/mock"
+	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/jmoiron/sqlx"
 )
 
-type MockDB struct {
-	mock.Mock
-}
+var (
+	id = "01HWV4B6R3PG8XJW74P69FJTBH"
 
-func (m *MockDB) Select(dest interface{}, query string, args ...interface{}) error {
-	argsMock := m.Called(dest, query, args)
-	return argsMock.Error(0)
-}
-
-func TestGetCustomerList(t *testing.T) {
-	mockDB := new(MockDB)
-	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
-		Level: slog.LevelDebug,
-	}))
-	gateway := NewCustomerGateway(&logger, mockDB)
-
-	id := "01HWV4B6R3PG8XJW74P69FJTBH"
-
-	customers := []*entity.Customer{
+	customers = []*entity.Customer{
 		{
 			ID:        &id,
 			Name:      "John",
@@ -50,47 +36,45 @@ func TestGetCustomerList(t *testing.T) {
 			UpdatedAt: time.Now(),
 		},
 	}
+)
 
-	mockDB.On("Select", &customers, "SELECT customer_ID, name, surname, email FROM customers;").Return(nil)
-
-	ctx := context.WithValue(context.Background(), "traceID", "123456")
-	result, err := gateway.GetCustomerList(ctx)
-
-	assert.NoError(t, err)
-	assert.NotNil(t, result)
-	assert.Equal(t, customers, result)
-
-	mockDB.AssertExpectations(t)
-}
-
-func TestGetCustomerList2(t *testing.T) {
-	// Create a mock DB
-	db, mock, err := sqlmock.New()
+func TestGetCustomerList(t *testing.T) {
+	mockDB, mock, err := sqlmock.New()
 	if err != nil {
-		t.Fatalf("an error '%s' was not expected when opening a stub database connection", err)
+		t.Fatalf("error %s was not expected when mocking db conn", err)
 	}
-	defer db.Close()
+	defer mockDB.Close()
+	db := sqlx.NewDb(mockDB, "sqlmock")
 
-	// Create a logger mock
-	loggerMock := &slog.MockLogger{}
+	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
+		Level: slog.LevelDebug,
+	}))
+	gateway := NewCustomerGateway(*logger, db)
 
-	// Set up mock expectations
-	rows := sqlmock.NewRows([]string{"customer_id", "name", "surname", "email"}).
-		AddRow("1", "John", "Doe", "john@example.com").
-		AddRow("2", "Jane", "Smith", "jane@example.com")
+	// ctx := context.WithValue(context.Background(), "traceID", "123456")
+
+	rows := sqlmock.NewRows([]string{"customer_ID", "name", "surname", "email"}).
+		AddRow("01HWV4B6R3PG8XJW74P69FJTBH", "John", "Doe", "john@gmail.com").
+		AddRow("01HWV4B6R3PG8XJW74P69FJTBH", "Doe", "John", "doe@gmail.com")
+
+	// Set up the expectations on the mock DB
 	mock.ExpectQuery("SELECT customer_ID, name, surname, email FROM customers;").WillReturnRows(rows)
 
-	// Create the customer gateway with mocks
-	gateway := NewCustomerGateway(loggerMock, db)
+	// Call the function under test
+	result, err := gateway.GetCustomerList(context.Background())
 
-	// Call the method
-	ctx := context.WithValue(context.Background(), "traceID", "test-trace-id")
-	customers, err := gateway.GetCustomerList(ctx)
+	// Check for errors
+	if err != nil {
+		t.Fatalf("expected no error, got %v", err)
+	}
 
-	// Check expectations
-	assert.NoError(t, err)
-	assert.Len(t, customers, 2)
+	// Assert that the returned customers match the expected ones
+	if !reflect.DeepEqual(result, customers) {
+		t.Errorf("unexpected customers returned, got %v, want %v", result, customers)
+	}
 
-	// Verify that all expectations were met
-	assert.NoError(t, mock.ExpectationsWereMet())
+	// Ensure all expectations were met
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Errorf("there were unfulfilled expectations: %s", err)
+	}
 }

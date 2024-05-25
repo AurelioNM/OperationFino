@@ -14,7 +14,6 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/oklog/ulid/v2"
-	"github.com/prometheus/client_golang/prometheus"
 )
 
 type CustomerHandler interface {
@@ -57,10 +56,8 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.metrics.SetTotalCustomers(len(customers))
-	h.metrics.IncreaseRequestsByStatusCode("200")
-	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "uri": "/v1/customers", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
-	h.metrics.SummaryDuration.Observe(time.Since(now).Seconds())
+	h.metrics.MeasureDuration(now, "GET", "/v1/customers", "200")
+	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, "All customers", time.Since(now), map[string]interface{}{"page": customers, "page_size": len(customers)})
 }
@@ -79,8 +76,8 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "GET", "uri": "/v1/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
-	h.metrics.IncreaseRequestsByStatusCode("200")
+	h.metrics.MeasureDuration(now, "GET", "/v1/customers/{customerId}", "200")
+	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Customer by ID: %s", id), time.Since(now), map[string]interface{}{"customer": customer})
 }
@@ -103,9 +100,8 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "POST", "uri": "/v1/customers", "status": "201"}).Observe(float64(time.Since(now).Seconds()))
-	h.metrics.IncreaseTotalCustomers()
-	h.metrics.IncreaseRequestsByStatusCode("201")
+	h.metrics.MeasureDuration(now, "POST", "/v1/customers", "201")
+	h.metrics.IncReqByStatusCode("201")
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
@@ -134,8 +130,8 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "PUT", "uri": "/v1/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
-	h.metrics.IncreaseRequestsByStatusCode("200")
+	h.metrics.MeasureDuration(now, "PUT", "/v1/customers", "200")
+	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, "Customer updated", time.Since(now), map[string]interface{}{"id": id})
 }
@@ -154,8 +150,8 @@ func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	h.metrics.Duration.With(prometheus.Labels{"method": "DELETE", "uri": "/v1/customers/{customerId}", "status": "200"}).Observe(float64(time.Since(now).Seconds()))
-	h.metrics.IncreaseRequestsByStatusCode("200")
+	h.metrics.MeasureDuration(now, "DELETE", "/v1/customers/{customerId}", "200")
+	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, "Customer deleted", time.Since(now), map[string]interface{}{})
 }
@@ -183,7 +179,7 @@ func (h *customerHandler) buildResponse(w http.ResponseWriter, message string, e
 }
 
 func (h *customerHandler) buildErrorResponse(w http.ResponseWriter, error string, statusCode int, operation string, elapsed time.Duration) {
-	h.metrics.IncreaseRequestsByStatusCode(fmt.Sprint(statusCode))
+	h.metrics.IncReqByStatusCode(fmt.Sprint(statusCode))
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	h.buildResponse(w, fmt.Sprintf("Error on %s customer: %s", operation, error), elapsed, map[string]interface{}{})

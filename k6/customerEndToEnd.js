@@ -6,7 +6,7 @@ export const options = {
 		{ duration: '2m', target: 1},
 		{ duration: '3m', target: 2},
 		{ duration: '4m', target: 3},
-		{ duration: '10m', target: 4},
+		{ duration: '6m', target: 4},
 	]
 }
 

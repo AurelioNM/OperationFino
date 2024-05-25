@@ -28,19 +28,6 @@
         "x": 0,
         "y": 0
       },
-      "id": 7,
-      "panels": [],
-      "title": "##### Summary",
-      "type": "row"
-    },
-    {
-      "collapsed": false,
-      "gridPos": {
-        "h": 1,
-        "w": 24,
-        "x": 0,
-        "y": 1
-      },
       "id": 6,
       "panels": [],
       "title": "##### HTTP Summary",
@@ -172,12 +159,16 @@
         "h": 11,
         "w": 12,
         "x": 0,
-        "y": 2
+        "y": 1
       },
       "id": 3,
       "options": {
         "legend": {
-          "calcs": ["max", "lastNotNull", "sum"],
+          "calcs": [
+            "max",
+            "lastNotNull",
+            "sum"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -194,7 +185,7 @@
             "uid": "P685884848CB9"
           },
           "editorMode": "code",
-          "expr": "rate(OF_CustomerService_total_customers_update[1m])",
+          "expr": "rate(requests_status_code{service=\"$service\"}[1m])",
           "instant": false,
           "legendFormat": "{{status}}",
           "range": true,
@@ -320,7 +311,7 @@
               {
                 "id": "color",
                 "value": {
-                  "fixedColor": "light-green",
+                  "fixedColor": "dark-purple",
                   "mode": "fixed"
                 }
               }
@@ -347,12 +338,16 @@
         "h": 11,
         "w": 12,
         "x": 12,
-        "y": 2
+        "y": 1
       },
       "id": 4,
       "options": {
         "legend": {
-          "calcs": ["lastNotNull", "min", "max"],
+          "calcs": [
+            "lastNotNull",
+            "min",
+            "max"
+          ],
           "displayMode": "table",
           "placement": "bottom",
           "showLegend": true
@@ -370,7 +365,7 @@
           },
           "editorMode": "code",
           "exemplar": false,
-          "expr": "histogram_quantile(0.98, sum(rate(OF_CustomerService_request_duration_seconds_bucket[1m])) by (uri, method, le))",
+          "expr": "histogram_quantile(0.98, sum(rate(request_duration_seconds_bucket{service=\"$service\"}[1m])) by (uri, method, le))",
           "format": "time_series",
           "instant": false,
           "legendFormat": "{{method}} {{uri}}",
@@ -382,15 +377,47 @@
       "type": "timeseries"
     }
   ],
-  "refresh": "",
+  "refresh": "5s",
   "schemaVersion": 39,
-  "tags": [],
+  "tags": [
+    "Services"
+  ],
   "templating": {
-    "list": []
+    "list": [
+      {
+        "current": {
+          "selected": true,
+          "text": "of-customer-service",
+          "value": "of-customer-service"
+        },
+        "datasource": {
+          "type": "prometheus",
+          "uid": "P685884848CB9"
+        },
+        "definition": "label_values(service)",
+        "hide": 0,
+        "includeAll": false,
+        "multi": false,
+        "name": "service",
+        "options": [],
+        "query": {
+          "query": "label_values(service)",
+          "refId": "service-variable-query"
+        },
+        "refresh": 1,
+        "regex": "",
+        "skipUrlSync": false,
+        "sort": 1,
+        "tagQuery": "",
+        "tagValuesQuery": "",
+        "type": "query",
+        "useTags": false
+      }
+    ]
   },
   "time": {
-    "from": "2024-04-13T14:35:31.991Z",
-    "to": "2024-04-13T15:05:12.033Z"
+    "from": "now-5m",
+    "to": "now"
   },
   "timepicker": {},
   "timezone": "browser",

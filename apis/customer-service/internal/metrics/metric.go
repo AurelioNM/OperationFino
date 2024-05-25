@@ -2,68 +2,47 @@ package metrics
 
 import (
 	"log/slog"
+	"time"
 
 	"github.com/prometheus/client_golang/prometheus"
 )
 
 type CustomerMetrics struct {
 	logger          slog.Logger
-	Version         string
-	AppInfo         *prometheus.GaugeVec
-	TotalCustomers  prometheus.Gauge
+	service         string
 	ReqByStatusCode *prometheus.CounterVec
 	Duration        *prometheus.HistogramVec
-	SummaryDuration prometheus.Summary
 }
 
 func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetrics {
-	namespace := "OF_CustomerService"
+	service := "of-customer-service"
 	m := &CustomerMetrics{
 		logger:  l,
-		Version: "1.0",
-		AppInfo: prometheus.NewGaugeVec(
-			prometheus.GaugeOpts{
-				Namespace: namespace,
-				Name:      "app_info",
-				Help:      "Information about app environment"},
-			[]string{"version"}),
-		TotalCustomers: prometheus.NewGauge(prometheus.GaugeOpts{
-			Namespace: namespace,
-			Name:      "total_customers",
-			Help:      "Number of customers on DB"}),
+		service: service,
 		ReqByStatusCode: prometheus.NewCounterVec(prometheus.CounterOpts{
-			Namespace: namespace,
-			Name:      "total_customers_update",
-			Help:      "Number of upgraded devices"},
-			[]string{"status"}),
+			Name: "requests_status_code",
+			Help: "Requests by status code"},
+			[]string{"service", "status"}),
 		Duration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
-			Namespace: namespace,
-			Name:      "request_duration_seconds",
-			Help:      "Duration of request",
-			Buckets:   []float64{0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0}},
-			[]string{"status", "method", "uri"}),
-		SummaryDuration: prometheus.NewSummary(prometheus.SummaryOpts{
-			Namespace:  namespace,
-			Name:       "request_summary_duration_seconds",
-			Help:       "Summary duration of request",
-			Objectives: map[float64]float64{0.5: 0.05, 0.9: 0.01, 0.99: 0.001},
-		}),
+			Name:    "request_duration_seconds",
+			Help:    "Duration of request",
+			Buckets: []float64{0.03, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3, 0.5, 0.6, 0.7, 0.8, 1.0, 1.5, 2.0, 2.5, 3.0}},
+			[]string{"service", "status", "method", "uri"}),
 	}
 
-	m.AppInfo.With(prometheus.Labels{"version": m.Version}).Set(1)
-
-	reg.MustRegister(m.TotalCustomers, m.AppInfo, m.ReqByStatusCode, m.Duration)
+	reg.MustRegister(m.ReqByStatusCode, m.Duration)
 	return m
 }
 
-func (m *CustomerMetrics) SetTotalCustomers(size int) {
-	m.TotalCustomers.Set(float64(size))
+func (m *CustomerMetrics) IncReqByStatusCode(status string) {
+	m.ReqByStatusCode.With(prometheus.Labels{"service": m.service, "status": status}).Inc()
 }
 
-func (m *CustomerMetrics) IncreaseTotalCustomers() {
-	m.TotalCustomers.Inc()
-}
-
-func (m *CustomerMetrics) IncreaseRequestsByStatusCode(status string) {
-	m.ReqByStatusCode.With(prometheus.Labels{"status": status}).Inc()
+func (m *CustomerMetrics) MeasureDuration(start time.Time, method string, uri string, statusCode string) {
+	m.Duration.With(prometheus.Labels{
+		"service": m.service,
+		"method":  method,
+		"uri":     uri,
+		"status":  statusCode,
+	}).Observe(float64(time.Since(start).Seconds()))
 }

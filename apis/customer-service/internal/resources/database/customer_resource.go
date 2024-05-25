@@ -60,6 +60,7 @@ func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string
 		return nil, err
 	}
 
+	defer rows.Close()
 	for rows.Next() {
 		customer := entity.Customer{}
 		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email)

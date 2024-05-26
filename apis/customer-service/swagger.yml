@@ -1,0 +1,147 @@
+openapi: 3.0.0
+info:
+  title: Customer Service API
+  version: 1.0.0
+paths:
+  /v1/customers:
+    get:
+      summary: Get all customers
+      description: Retrieve a list of all customers.
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseCustomers'
+    post:
+      summary: Create a new customer
+      description: Create a new customer entry.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '201':
+          description: Customer created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseID'
+  '/v1/customers/{id}':
+    get:
+      summary: Get customer by ID
+      description: Retrieve a customer by their ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ResponseCustomer'
+        '404':
+          description: Customer not found
+    put:
+      summary: Update customer
+      description: Update an existing customer entry.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Customer'
+      responses:
+        '200':
+          description: Customer updated successfully
+        '404':
+          description: Customer not found
+    delete:
+      summary: Delete customer by ID
+      description: Delete a customer by their ID.
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer deleted successfully
+        '404':
+          description: Customer not found
+components:
+  schemas:
+    Customer:
+      type: object
+      properties:
+        name:
+          type: string
+        surname:
+          type: string
+        email:
+          type: string
+          format: email
+        birthdate:
+          type: string
+          format: date
+    ResponseCustomers:
+      type: object
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        elapsed_time:
+          type: string
+        data:
+          type: object
+          properties:
+            page:
+              type: array
+              items:
+                $ref: '#/components/schemas/Customer'
+            page_size:
+              type: integer
+    ResponseCustomer:
+      type: object
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        elapsed_time:
+          type: string
+        data:
+          $ref: '#/components/schemas/Customer'
+    ResponseID:
+      type: object
+      properties:
+        message:
+          type: string
+        timestamp:
+          type: string
+          format: date-time
+        elapsed_time:
+          type: string
+        data:
+          type: object
+          properties:
+            id:
+              type: string
+

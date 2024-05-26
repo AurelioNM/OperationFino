@@ -33,7 +33,7 @@ services:
       - "9080:9090"
     volumes:
       - "./observability/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml"
-      - "of_prometheus_vol:/prometheus/customer-service"
+      - "of_prometheus_vol:/prometheus"
     networks:
       - of-network
     extra_hosts:
@@ -68,6 +68,8 @@ services:
       - '9300:9300'
     environment:
       - discovery.type=single-node
+    mem_limit: 500M
+    mem_reservation: 200M
     volumes:
       - of_elasticsearch_vol:/usr/share/elasticsearch/data
     networks:

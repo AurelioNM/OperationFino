@@ -22,6 +22,7 @@ import (
 	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/collectors"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
+	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
@@ -46,7 +47,7 @@ func main() {
 		return
 	}
 
-	// METRICS
+	// Metrics
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(collectors.NewGoCollector())
 	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
@@ -62,6 +63,13 @@ func main() {
 	r.HandleFunc("/v1/customers", customerHandler.CreateCustomer).Methods("POST")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")
+
+	// Swagger
+	r.PathPrefix("/customers/doc/").Handler(httpSwagger.Handler(
+		httpSwagger.URL("/swagger.yml"),
+	))
+	fs := http.FileServer(http.Dir("./"))
+	r.PathPrefix("/").Handler(fs)
 
 	logger.Debug("Starting customer-service", "port", os.Getenv("APP_PORT"))
 	go http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r)

@@ -8,17 +8,18 @@
 - [x] config pyroscope
 - [x] layers handler, service, resources
 - [x] go Context
-- [ ] swagger
-- [ ] profiling
+- [x] swagger
+- [ ] learn profiling
 - Observability
     - [x] logs
-	- [x] generate metrics
-	- [x] config prometheus
-	- [x] create basic grafana dashboards
-	- [ ] improve dashboards
-	    - [x] transform Update-Req dashboard into RequestsByStatusCode
-	    - [ ] add total reqs dashboard
-	    - [ ] add error rate dashboard
+    - [x] generate metrics
+    - [x] config prometheus
+    - [x] create basic grafana dashboards
+    - [ ] improve dashboards
+	- [x] transform Update-Req dashboard into RequestsByStatusCode
+	- [x] add reqs by status code dashboard
+	- [ ] add total reqs dashboard
+	- [ ] add error rate dashboard
 - Testing
 	- [x] k6
 	    - [x] basic load tests

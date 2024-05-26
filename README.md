@@ -15,11 +15,11 @@
     - [x] generate metrics
     - [x] config prometheus
     - [x] create basic grafana dashboards
-    - [ ] improve dashboards
+    - [x] improve dashboards
 	- [x] transform Update-Req dashboard into RequestsByStatusCode
 	- [x] add reqs by status code dashboard
-	- [ ] add total reqs dashboard
-	- [ ] add error rate dashboard
+	- [x] add reqs rate dashboard
+	- [x] add error dashboard
 - Testing
 	- [x] k6
 	    - [x] basic load tests

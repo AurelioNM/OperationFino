@@ -52,14 +52,14 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 
 	customers, err := h.customerSvc.GetCustomerList(ctx)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "getAll", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "GET", "/v1/customers", now)
 		return
 	}
 
 	h.metrics.MeasureDuration(now, "GET", "/v1/customers", "200")
 	h.metrics.IncReqByStatusCode("200")
 
-	h.buildResponse(w, "All customers", time.Since(now), map[string]interface{}{"page": customers, "page_size": len(customers)})
+	h.buildResponse(w, "All customers", now, map[string]interface{}{"page": customers, "page_size": len(customers)})
 }
 
 func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {
@@ -72,14 +72,14 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 
 	customer, err := h.customerSvc.GetCustomerByID(ctx, id)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "getByID", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/customers/{customerId}", now)
 		return
 	}
 
 	h.metrics.MeasureDuration(now, "GET", "/v1/customers/{customerId}", "200")
 	h.metrics.IncReqByStatusCode("200")
 
-	h.buildResponse(w, fmt.Sprintf("Customer by ID: %s", id), time.Since(now), map[string]interface{}{"customer": customer})
+	h.buildResponse(w, fmt.Sprintf("Customer by ID: %s", id), now, map[string]interface{}{"customer": customer})
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {
@@ -90,13 +90,13 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 	var customer entity.Customer
 	err := json.NewDecoder(r.Body).Decode(&customer)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "create", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "POST", "/v1/customers", now)
 		return
 	}
 
 	id, err := h.customerSvc.CreateCustomer(ctx, customer)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "create", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "POST", "/v1/customers", now)
 		return
 	}
 
@@ -105,7 +105,7 @@ func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request)
 
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
-	h.buildResponse(w, "Customer created", time.Since(now), map[string]interface{}{"id": id})
+	h.buildResponse(w, "Customer created", now, map[string]interface{}{"id": id})
 }
 
 func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request) {
@@ -119,21 +119,21 @@ func (h *customerHandler) UpdateCustomer(w http.ResponseWriter, r *http.Request)
 
 	err := json.NewDecoder(r.Body).Decode(&customer)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "update", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "PUT", "/v1/customers", now)
 		return
 	}
 	customer.ID = &id
 
 	err = h.customerSvc.UpdateCustomer(ctx, customer)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "update", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "PUT", "/v1/customers", now)
 		return
 	}
 
 	h.metrics.MeasureDuration(now, "PUT", "/v1/customers", "200")
 	h.metrics.IncReqByStatusCode("200")
 
-	h.buildResponse(w, "Customer updated", time.Since(now), map[string]interface{}{"id": id})
+	h.buildResponse(w, "Customer updated", now, map[string]interface{}{"id": id})
 }
 
 func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request) {
@@ -146,14 +146,14 @@ func (h *customerHandler) DeleteCustomer(w http.ResponseWriter, r *http.Request)
 
 	err := h.customerSvc.DeleteCustomerByID(ctx, id)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "delete", time.Since(now))
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "DELETE", "/v1/customers/{customerId}", now)
 		return
 	}
 
 	h.metrics.MeasureDuration(now, "DELETE", "/v1/customers/{customerId}", "200")
 	h.metrics.IncReqByStatusCode("200")
 
-	h.buildResponse(w, "Customer deleted", time.Since(now), map[string]interface{}{})
+	h.buildResponse(w, "Customer deleted", now, map[string]interface{}{})
 }
 
 func (h *customerHandler) getContext(r *http.Request) context.Context {
@@ -166,11 +166,11 @@ func (h *customerHandler) getContext(r *http.Request) context.Context {
 	return ctx
 }
 
-func (h *customerHandler) buildResponse(w http.ResponseWriter, message string, elapsedTime time.Duration, data map[string]interface{}) {
+func (h *customerHandler) buildResponse(w http.ResponseWriter, message string, start time.Time, data map[string]interface{}) {
 	res := &response{
 		Message:     message,
 		Timestamp:   time.Now(),
-		ElapsedTime: fmt.Sprintf("%dms", elapsedTime.Milliseconds()),
+		ElapsedTime: fmt.Sprintf("%dms", time.Since(start).Milliseconds()),
 		Data:        data,
 	}
 
@@ -178,9 +178,11 @@ func (h *customerHandler) buildResponse(w http.ResponseWriter, message string, e
 	json.NewEncoder(w).Encode(res)
 }
 
-func (h *customerHandler) buildErrorResponse(w http.ResponseWriter, error string, statusCode int, operation string, elapsed time.Duration) {
+func (h *customerHandler) buildErrorResponse(w http.ResponseWriter, error string, statusCode int, method string, uri string, start time.Time) {
+	h.metrics.MeasureDuration(start, method, uri, fmt.Sprint(statusCode))
 	h.metrics.IncReqByStatusCode(fmt.Sprint(statusCode))
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
-	h.buildResponse(w, fmt.Sprintf("Error on %s customer: %s", operation, error), elapsed, map[string]interface{}{})
+	h.buildResponse(w, fmt.Sprintf("Error on %s customer: %s", method, error), start, map[string]interface{}{})
 }

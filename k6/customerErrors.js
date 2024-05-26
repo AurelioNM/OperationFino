@@ -3,13 +3,11 @@ import { check } from 'k6';
 
 export const options = {
 	stages: [
-		// { duration: '2m', target: 1},
-		// { duration: '3m', target: 2},
-		// { duration: '4m', target: 3},
-		// { duration: '6m', target: 4},
-		{ duration: '1m', target: 1},
-		{ duration: '3s', target: 7},
-		{ duration: '5m', target: 8},
+		{ duration: '2m', target: 1},
+		{ duration: '3m', target: 2},
+		{ duration: '4m', target: 3},
+		{ duration: '6m', target: 4},
+		{ duration: '7m', target: 5},
 	]
 }
 
@@ -24,7 +22,7 @@ function generateJson() {
 	return JSON.stringify({
 		name: generateRandomString(6),
 		surname: generateRandomString(6),
-		email: `${generateRandomString(8)}@gmail.com`,
+		email: `errorEmail@gmail.com`,
 		birthdate: "1998-08-18"
 	})
 }
@@ -42,7 +40,7 @@ export default function() {
 	check(createResponse, {
 		'create status 201': (r) => r.status === 201
 	})
-	const createdId = createResponse.json().data.id
+	const createdId = "errorID"
 	url = `${url}/${createdId}`
 
 	// GET

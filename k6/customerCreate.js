@@ -8,11 +8,6 @@ export const options = {
 
 export default function() {
 	const url = "http://127.0.0.1:8001/v1/customers"
-	const params = {
-		headers: {
-			'Content-Type': 'application/json',
-		}
-	}
 
 	const payload = JSON.stringify({
 		name: randomString(6),
@@ -21,7 +16,7 @@ export default function() {
 		birthdate: "1998-08-18"
 	})
 
-	const res = http.post(url, payload, params)
+	const res = http.post(url, payload)
 
 	check(res, {
 		'status 201': (r) => r.status === 201

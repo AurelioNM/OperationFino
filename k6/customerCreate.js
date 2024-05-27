@@ -10,13 +10,17 @@ export default function() {
 	const url = "http://127.0.0.1:8001/v1/customers"
 
 	const payload = JSON.stringify({
-		name: randomString(6),
-		surname: randomString(6),
+		name: randomWordFromArray(),
+		surname: randomWordFromArray(),
 		email: `${randomString(8)}@gmail.com`,
-		birthdate: "1998-08-18"
+		birthdate: randomDate()
 	})
 
 	const res = http.post(url, payload)
+	if (res.status !== 201 ) {
+		console.log(payload)
+		console.log(res.body)
+	}
 
 	check(res, {
 		'status 201': (r) => r.status === 201
@@ -31,7 +35,7 @@ function randomString(length, charset = '') {
 }
 
 function randomWordFromArray() {
-	const words = ['PS5', 'Shirt', 'Notebook', 'Coffee', 'JBL-5']
+	const words = ["Gabriel", "Miguel", "Arthur", "Heitor", "Helena", "Alice", "Laura", "Davi", "Gael", "Valentina", "Maria Eduarda", "Lorenzo", "Lívia", "Enzo", "Heloísa", "Isabella", "Cauã", "Thiago", "Joaquim", "Luiz", "Sophia", "Mariana", "João", "Henrique", "Rafaela", "Manuela", "Lucas", "Isadora", "Bernardo", "Pedro", "Yasmin", "Lara", "Carlos", "Beatriz", "Samuel", "Luna", "Felipe", "Victor", "Aline", "Eduardo", "Breno", "Ana Clara", "Clara", "Guilherme", "Letícia", "Diego", "Marcos", "Vitória", "Caio"];
 	return words[Math.floor(Math.random() * words.length)]
 }
 
@@ -48,9 +52,9 @@ function randomInteger(min, max) {
 }
 
 function randomDate() {
-	const year = Math.floor(Math.random() * 26) + 2000
+	const year = Math.floor(Math.random() * 26) + 1980
 	const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')
-	const day = String(Math.floor(Math.random() * 31) + 1).padStart(2, '0')
+	const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')
 	return `${year}-${month}-${day}`
 }
 

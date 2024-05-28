@@ -1,4 +1,4 @@
-package database
+package service
 
 import (
 	"cmd/customer-service/internal/domain/entity"
@@ -11,9 +11,9 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-var customerGtw = new(mocks.CustomerGateway)
+var customerSvc = new(mocks.CustomerService)
 
-func Test_CustomerGtw_GetCustomerList(t *testing.T) {
+func Test_CustomerSvc_GetCustomerList(t *testing.T) {
 	type args struct {
 		ctx context.Context
 	}
@@ -31,19 +31,19 @@ func Test_CustomerGtw_GetCustomerList(t *testing.T) {
 	for _, tt := range scenarios {
 		tt := tt
 
-		customerGtw.On("GetCustomerList", tt.args.ctx).Return(tt.want, tt.expectedErr)
+		customerSvc.On("GetCustomerList", tt.args.ctx).Return(tt.want, tt.expectedErr)
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := customerGtw.GetCustomerList(tt.args.ctx)
+			got, err := customerSvc.GetCustomerList(tt.args.ctx)
 
 			assert.ErrorIs(t, err, tt.expectedErr)
 			assert.Equal(t, tt.want, got)
-			customerGtw.AssertExpectations(t)
+			customerSvc.AssertExpectations(t)
 		})
 	}
 }
 
-func Test_CustomerGtw_GetCustomerByID(t *testing.T) {
+func Test_CustomerSvc_GetCustomerByID(t *testing.T) {
 	type args struct {
 		ctx        context.Context
 		customerID string
@@ -62,19 +62,19 @@ func Test_CustomerGtw_GetCustomerByID(t *testing.T) {
 	for _, tt := range scenarios {
 		tt := tt
 
-		customerGtw.On("GetCustomerByID", tt.args.ctx, tt.args.customerID).Return(tt.want, tt.expectedErr)
+		customerSvc.On("GetCustomerByID", tt.args.ctx, tt.args.customerID).Return(tt.want, tt.expectedErr)
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := customerGtw.GetCustomerByID(tt.args.ctx, tt.args.customerID)
+			got, err := customerSvc.GetCustomerByID(tt.args.ctx, tt.args.customerID)
 
 			assert.ErrorIs(t, err, tt.expectedErr)
 			assert.Equal(t, tt.want, got)
-			customerGtw.AssertExpectations(t)
+			customerSvc.AssertExpectations(t)
 		})
 	}
 }
 
-func Test_CustomerGtw_CreateCustomer(t *testing.T) {
+func Test_CustomerSvc_CreateCustomer(t *testing.T) {
 	type args struct {
 		ctx      context.Context
 		customer entity.Customer
@@ -98,19 +98,19 @@ func Test_CustomerGtw_CreateCustomer(t *testing.T) {
 	for _, tt := range scenarios {
 		tt := tt
 
-		customerGtw.On("CreateCustomer", tt.args.ctx, tt.args.customer).Return(tt.want, tt.expectedErr)
+		customerSvc.On("CreateCustomer", tt.args.ctx, tt.args.customer).Return(tt.want, tt.expectedErr)
 
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := customerGtw.CreateCustomer(tt.args.ctx, tt.args.customer)
+			got, err := customerSvc.CreateCustomer(tt.args.ctx, tt.args.customer)
 
 			assert.ErrorIs(t, err, tt.expectedErr)
 			assert.Equal(t, tt.want, got)
-			customerGtw.AssertExpectations(t)
+			customerSvc.AssertExpectations(t)
 		})
 	}
 }
 
-func Test_CustomerGtw_UpdateCustomer(t *testing.T) {
+func Test_CustomerSvc_UpdateCustomer(t *testing.T) {
 	type args struct {
 		ctx      context.Context
 		customer entity.Customer
@@ -134,18 +134,18 @@ func Test_CustomerGtw_UpdateCustomer(t *testing.T) {
 	for _, tt := range scenarios {
 		tt := tt
 
-		customerGtw.On("UpdateCustomer", tt.args.ctx, tt.args.customer).Return(tt.expectedErr)
+		customerSvc.On("UpdateCustomer", tt.args.ctx, tt.args.customer).Return(tt.expectedErr)
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := customerGtw.UpdateCustomer(tt.args.ctx, tt.args.customer)
+			err := customerSvc.UpdateCustomer(tt.args.ctx, tt.args.customer)
 
 			assert.ErrorIs(t, err, tt.expectedErr)
-			customerGtw.AssertExpectations(t)
+			customerSvc.AssertExpectations(t)
 		})
 	}
 }
 
-func Test_CustomerGtw_DeleteCustomerByID(t *testing.T) {
+func Test_CustomerSvc_DeleteCustomerByID(t *testing.T) {
 	type args struct {
 		ctx        context.Context
 		customerID string
@@ -163,13 +163,13 @@ func Test_CustomerGtw_DeleteCustomerByID(t *testing.T) {
 	for _, tt := range scenarios {
 		tt := tt
 
-		customerGtw.On("DeleteCustomerByID", tt.args.ctx, tt.args.customerID).Return(tt.expectedErr)
+		customerSvc.On("DeleteCustomerByID", tt.args.ctx, tt.args.customerID).Return(tt.expectedErr)
 
 		t.Run(tt.name, func(t *testing.T) {
-			err := customerGtw.DeleteCustomerByID(tt.args.ctx, tt.args.customerID)
+			err := customerSvc.DeleteCustomerByID(tt.args.ctx, tt.args.customerID)
 
 			assert.ErrorIs(t, err, tt.expectedErr)
-			customerGtw.AssertExpectations(t)
+			customerSvc.AssertExpectations(t)
 		})
 	}
 }

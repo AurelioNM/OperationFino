@@ -4,7 +4,7 @@ run-customer-service:
 		&& docker-compose -f ../../docker/docker-compose.yml up --build of-customer-service
 
 test-customer-service:
-	clear && cd ./apis/customer-service \
+	cd ./apis/customer-service \
 		&& go test -v ./... && cd -
 
 db-size:

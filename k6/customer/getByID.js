@@ -2,7 +2,7 @@ import http from 'k6/http';
 
 export const options = {
 	vus: 1,
-	duration: '5m',
+	duration: '10m',
 };
 
 export default function() {
@@ -29,6 +29,9 @@ function randomIdFromArray() {
 		"01HZ77Y971M38V7HA6KN8DY1F8",
 		"01HZ77Y976T4RJEGBW1M01ZD8Z",
 		"01HZ77Y97GJGP2SFZ3CVJN1XAE",
+		"01HZ7E8GR6M3GNNKZPTVW7DAGX",
+		"01HZ7E8GR7SBPV9F96XRR5HCW2",
+		"01HZ7E8GR7SBPV9F96Y1EYM2AC",
 	];
 	return ids[Math.floor(Math.random() * ids.length)]
 }

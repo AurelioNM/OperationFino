@@ -26,7 +26,7 @@ func NewCustomerGateway(l slog.Logger, db *sql.DB) gateway.CustomerGateway {
 
 func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Customer, error) {
 	g.logger.Debug("Getting all customers from db", "traceID", ctx.Value("traceID"))
-	query := "SELECT customer_ID, name, surname, email, birthdate FROM customers;"
+	query := "SELECT customer_ID, name, surname, email, birthdate, created_at, updated_at FROM customers;"
 
 	rows, err := g.db.Query(query)
 	if err != nil {
@@ -38,7 +38,7 @@ func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Custom
 	customers := make([]*entity.Customer, 0)
 	for rows.Next() {
 		customer := &entity.Customer{}
-		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate)
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate, &customer.CreatedAt, &customer.UpdatedAt)
 		if err != nil {
 			g.logger.Error("Error scaning row", "error", err)
 			return nil, err
@@ -75,7 +75,7 @@ func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string
 
 func (g *customerGateway) GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
 	g.logger.Debug("Getting customer by email from db", "email", customerEmail, "traceID", ctx.Value("traceID"))
-	query := "SELECT customer_id, name, surname, email, birthdate FROM customers WHERE email = $1;"
+	query := "SELECT customer_id, name, surname, email, birthdate, created_at, updated_at FROM customers WHERE email = $1;"
 
 	rows, err := g.db.Query(query, customerEmail)
 	if err != nil {
@@ -86,7 +86,7 @@ func (g *customerGateway) GetCustomerByEmail(ctx context.Context, customerEmail 
 	defer rows.Close()
 	for rows.Next() {
 		customer := entity.Customer{}
-		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate)
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate, &customer.CreatedAt, &customer.UpdatedAt)
 		if err != nil {
 			g.logger.Error("Error scaning row", "error", err)
 			return nil, err

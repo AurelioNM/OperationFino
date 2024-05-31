@@ -36,8 +36,6 @@ func main() {
 		log.Fatal("Failed to load .env file", "error", err)
 	}
 
-	r := mux.NewRouter()
-
 	logger := slog.New(slog.NewJSONHandler(os.Stderr, &slog.HandlerOptions{
 		Level: slog.LevelDebug,
 	}))
@@ -57,7 +55,7 @@ func main() {
 	// Metrics
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(collectors.NewGoCollector())
-	promHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
+	prometheusHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
 
 	metrics := metrics.NewCustomerMetrics(*logger, reg)
 	customerGtw := database.NewCustomerGateway(*logger, db.DB)
@@ -65,7 +63,21 @@ func main() {
 	customerSvc := service.NewCustomerService(*logger, customerGtw, customerCache)
 	customerHandler := api.NewCustomerHandler(*logger, metrics, customerSvc)
 
-	r.HandleFunc("/metrics", promHandler.ServeHTTP).Methods("GET")
+	r := createRouter(prometheusHandler, customerHandler)
+	logger.Debug("Starting customer-service", "port", os.Getenv("APP_PORT"))
+	go http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r)
+
+	quitChannel := make(chan os.Signal, 1)
+	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
+	<-quitChannel
+
+	logger.Debug("Stoping customer-service")
+}
+
+func createRouter(prometheusHandler http.Handler, customerHandler api.CustomerHandler) *mux.Router {
+	r := mux.NewRouter()
+
+	r.HandleFunc("/metrics", prometheusHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/v1/customers", customerHandler.GetCustomers).Methods("GET")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")
 	r.HandleFunc("/v2/customers/{id}", customerHandler.V2GetCustomerByID).Methods("GET")
@@ -82,12 +94,5 @@ func main() {
 	fs := http.FileServer(http.Dir("./"))
 	r.PathPrefix("/").Handler(fs)
 
-	logger.Debug("Starting customer-service", "port", os.Getenv("APP_PORT"))
-	go http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r)
-
-	quitChannel := make(chan os.Signal, 1)
-	signal.Notify(quitChannel, syscall.SIGINT, syscall.SIGTERM)
-	<-quitChannel
-
-	logger.Debug("Stoping customer-service")
+	return r
 }

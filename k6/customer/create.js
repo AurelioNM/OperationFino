@@ -17,11 +17,6 @@ export default function() {
 	})
 
 	const res = http.post(url, payload)
-	if (res.status !== 201 ) {
-		console.log(payload)
-		console.log(res.body)
-	}
-
 	check(res, {
 		'status 201': (r) => r.status === 201
 	})

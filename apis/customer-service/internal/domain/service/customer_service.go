@@ -84,6 +84,7 @@ func (s *customerService) GetCustomerByEmail(ctx context.Context, customerEmail 
 
 func (s *customerService) V2GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
 	s.logger.Info("Getting customer by email", "email", customerEmail, "traceID", ctx.Value("traceID"))
+
 	customer, err := s.customerCache.ReadCacheByEmail(ctx, customerEmail)
 	if err != nil {
 		customer, err = s.customerGtw.GetCustomerByEmail(ctx, customerEmail)

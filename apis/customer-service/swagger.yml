@@ -1,60 +1,107 @@
 openapi: 3.0.0
 info:
-  title: Customer Service API
+  title: Customer API
+  description: API for managing customers
   version: 1.0.0
 paths:
-  /v1/customers:
+  "/v1/customers":
     get:
       summary: Get all customers
-      description: Retrieve a list of all customers.
+      tags:
+        - CustomersV1
       responses:
         '200':
-          description: Successful response
+          description: A list of customers
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseCustomers'
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      page_size:
+                        type: integer
+                      page_content:
+                        type: array
+                        items:
+                          $ref: '#/components/schemas/Customer'
     post:
+      tags:
+        - CustomersV1
       summary: Create a new customer
-      description: Create a new customer entry.
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Customer'
+              $ref: '#/components/schemas/CustomerWrite'
       responses:
         '201':
-          description: Customer created successfully
+          description: Customer created
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseID'
-  '/v1/customers/{id}':
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+
+  "/v1/customers/{id}":
     get:
-      summary: Get customer by ID
-      description: Retrieve a customer by their ID.
+      tags:
+        - CustomersV1
+      summary: Get a customer by ID
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Successful response
+          description: Customer details
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ResponseCustomer'
-        '404':
-          description: Customer not found
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      customer:
+                        $ref: '#/components/schemas/Customer'
     put:
-      summary: Update customer
-      description: Update an existing customer entry.
+      tags:
+        - CustomersV1
+      summary: Update a customer by ID
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: string
@@ -63,85 +110,191 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Customer'
+              $ref: '#/components/schemas/CustomerWrite'
       responses:
         '200':
-          description: Customer updated successfully
-        '404':
-          description: Customer not found
+          description: Customer updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
     delete:
-      summary: Delete customer by ID
-      description: Delete a customer by their ID.
+      tags:
+        - CustomersV1
+      summary: Delete a customer by ID
       parameters:
-        - in: path
-          name: id
+        - name: id
+          in: path
           required: true
           schema:
             type: string
       responses:
         '200':
-          description: Customer deleted successfully
-        '404':
-          description: Customer not found
+          description: Customer deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+
+  "/v2/customers/{id}":
+    get:
+      tags:
+        - CustomersV2
+      summary: Get a customer by ID (using Cache)
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer details (using Cache)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      customer:
+                        $ref: '#/components/schemas/Customer'
+
+  "/v1/customers/email/{email}":
+    get:
+      tags:
+        - CustomersV1
+      summary: Get a customer by email
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer details by email
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      customer:
+                        $ref: '#/components/schemas/Customer'
+
+  "/v2/customers/email/{email}":
+    get:
+      tags:
+        - CustomersV2
+      summary: Get a customer by email (using Cache)
+      parameters:
+        - name: email
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Customer details by email (using Cache)
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      customer:
+                        $ref: '#/components/schemas/Customer'
+
 components:
   schemas:
     Customer:
       type: object
       properties:
+        customer_id:
+          type: string
+          example: "01HZ7E8GR7SBPV9F96XRR5HCW2"
         name:
           type: string
+          example: "Juninho"
         surname:
           type: string
+          example: "Doença"
         email:
           type: string
-          format: email
+          example: "doenca@gmail.com"
         birthdate:
           type: string
           format: date
-    ResponseCustomers:
-      type: object
-      properties:
-        message:
-          type: string
-        timestamp:
+          example: "1990-03-07"
+        created_at:
           type: string
           format: date-time
-        elapsed_time:
-          type: string
-        data:
-          type: object
-          properties:
-            page:
-              type: array
-              items:
-                $ref: '#/components/schemas/Customer'
-            page_size:
-              type: integer
-    ResponseCustomer:
-      type: object
-      properties:
-        message:
-          type: string
-        timestamp:
+        updated_at:
           type: string
           format: date-time
-        elapsed_time:
-          type: string
-        data:
-          $ref: '#/components/schemas/Customer'
-    ResponseID:
+          nullable: true
+    CustomerWrite:
       type: object
       properties:
-        message:
+        name:
           type: string
-        timestamp:
+          example: "Juninho"
+        surname:
           type: string
-          format: date-time
-        elapsed_time:
+          example: "Doença"
+        email:
           type: string
-        data:
-          type: object
-          properties:
-            id:
-              type: string
+          example: "doenca@gmail.com"
+        birthdate:
+          type: string
+          format: date
+          example: "1990-03-07"
 

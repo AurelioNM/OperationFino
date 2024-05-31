@@ -34,6 +34,13 @@ function randomWordFromArray() {
 	return words[Math.floor(Math.random() * words.length)]
 }
 
+function randomDate() {
+	const year = Math.floor(Math.random() * 26) + 1980
+	const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')
+	const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')
+	return `${year}-${month}-${day}`
+}
+
 function randomPrice() {
 	const min = 1.00
 	const max = 1000000.00
@@ -44,12 +51,5 @@ function randomPrice() {
 
 function randomInteger(min, max) {
 	return Math.floor(Math.random() * (max - min + 1) + min)
-}
-
-function randomDate() {
-	const year = Math.floor(Math.random() * 26) + 1980
-	const month = String(Math.floor(Math.random() * 12) + 1).padStart(2, '0')
-	const day = String(Math.floor(Math.random() * 28) + 1).padStart(2, '0')
-	return `${year}-${month}-${day}`
 }
 

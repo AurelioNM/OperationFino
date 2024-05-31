@@ -3,6 +3,7 @@ package service
 import (
 	"cmd/customer-service/internal/domain/entity"
 	"cmd/customer-service/internal/domain/gateway"
+	"cmd/customer-service/internal/resources/cache"
 	"context"
 
 	"log/slog"
@@ -11,20 +12,23 @@ import (
 type CustomerService interface {
 	GetCustomerList(ctx context.Context) ([]*entity.Customer, error)
 	GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
+	V2GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
 	CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error)
 	UpdateCustomer(ctx context.Context, customer entity.Customer) error
 	DeleteCustomerByID(ctx context.Context, customerID string) error
 }
 
 type customerService struct {
-	logger      slog.Logger
-	customerGtw gateway.CustomerGateway
+	logger        slog.Logger
+	customerGtw   gateway.CustomerGateway
+	customerCache cache.CustomerCache
 }
 
-func NewCustomerService(l slog.Logger, c gateway.CustomerGateway) CustomerService {
+func NewCustomerService(l slog.Logger, g gateway.CustomerGateway, c cache.CustomerCache) CustomerService {
 	return &customerService{
-		logger:      *l.With("layer", "customer-service"),
-		customerGtw: c,
+		logger:        *l.With("layer", "customer-service"),
+		customerGtw:   g,
+		customerCache: c,
 	}
 }
 
@@ -44,6 +48,22 @@ func (s *customerService) GetCustomerByID(ctx context.Context, customerID string
 	if err != nil {
 		s.logger.Error("Failed to get customer by ID", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
+	}
+
+	return customer, nil
+}
+
+func (s *customerService) V2GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error) {
+	s.logger.Info("Getting customer by ID", "ID", customerID, "traceID", ctx.Value("traceID"))
+	customer, err := s.customerCache.GetCachedCustomer(ctx, customerID)
+	if err != nil {
+		customer, err = s.customerGtw.GetCustomerByID(ctx, customerID)
+		if err != nil {
+			s.logger.Error("Failed to get customer by ID", "error", err, "traceID", ctx.Value("traceID"))
+			return nil, err
+		}
+		s.customerCache.CreateCustomerCache(ctx, *customer)
+		return customer, nil
 	}
 
 	return customer, nil

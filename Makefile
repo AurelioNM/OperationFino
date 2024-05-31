@@ -11,6 +11,10 @@ db-size:
 	docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
 		"SELECT COUNT(*) AS customers_size FROM customers;" 
 
+db-get:
+	docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
+		"SELECT * FROM customers;" 
+
 db-clean:
 	docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
 		"DELETE FROM customers;"

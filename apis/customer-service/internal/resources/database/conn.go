@@ -19,7 +19,7 @@ type DbConn struct {
 }
 
 func CreateDBConnPool(logger slog.Logger) (*DbConn, error) {
-	logger.Debug("Creating DSN config")
+	logger.Debug("Creating DB DSN config")
 	url := &url.URL{
 		Scheme: os.Getenv("DB_TYPE"),
 		Host:   fmt.Sprintf("%s:%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT")),

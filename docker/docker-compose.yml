@@ -26,6 +26,14 @@ services:
     networks:
       - of-network
 
+  of-customer-redis:
+    image: redis
+    container_name: of-customer-redis
+    ports:
+      - "6379:6380"
+    networks:
+      - of-network
+
   of-prometheus:
     image: prom/prometheus
     container_name: of-prometheus

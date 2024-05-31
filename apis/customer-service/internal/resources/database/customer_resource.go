@@ -6,7 +6,6 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
-	"time"
 
 	"log/slog"
 
@@ -27,7 +26,7 @@ func NewCustomerGateway(l slog.Logger, db *sql.DB) gateway.CustomerGateway {
 
 func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Customer, error) {
 	g.logger.Debug("Getting all customers from db", "traceID", ctx.Value("traceID"))
-	query := "SELECT customer_ID, name, surname, email FROM customers;"
+	query := "SELECT customer_ID, name, surname, email, birthdate FROM customers;"
 
 	rows, err := g.db.Query(query)
 	if err != nil {
@@ -39,7 +38,7 @@ func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Custom
 	customers := make([]*entity.Customer, 0)
 	for rows.Next() {
 		customer := &entity.Customer{}
-		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email)
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate)
 		if err != nil {
 			g.logger.Error("Error scaning row", "error", err)
 			return nil, err
@@ -52,7 +51,7 @@ func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Custom
 
 func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error) {
 	g.logger.Debug("Getting customer by ID from db", "ID", customerID, "traceID", ctx.Value("traceID"))
-	query := "SELECT customer_id, name, surname, email FROM customers WHERE customer_id = $1;"
+	query := "SELECT customer_id, name, surname, email, birthdate FROM customers WHERE customer_id = $1;"
 
 	rows, err := g.db.Query(query, customerID)
 	if err != nil {
@@ -63,7 +62,7 @@ func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string
 	defer rows.Close()
 	for rows.Next() {
 		customer := entity.Customer{}
-		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email)
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate)
 		if err != nil {
 			g.logger.Error("Error scaning row", "error", err)
 			return nil, err
@@ -83,7 +82,7 @@ func (g *customerGateway) CreateCustomer(ctx context.Context, customer entity.Cu
 		customer.Name,
 		customer.Surname,
 		customer.Email,
-		customer.Birthdate.Format(time.DateOnly))
+		customer.Birthdate)
 	if err != nil {
 		g.logger.Error("Failed to insert customer into db", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err

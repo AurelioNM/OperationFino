@@ -5,6 +5,7 @@ import (
 	"cmd/customer-service/internal/domain/service"
 	"cmd/customer-service/internal/metrics"
 	"cmd/customer-service/internal/pyroscope"
+	"cmd/customer-service/internal/resources/cache"
 	"cmd/customer-service/internal/resources/database"
 	"fmt"
 	"log"
@@ -47,6 +48,12 @@ func main() {
 		return
 	}
 
+	cacheClient, err := cache.GetCacheClient(*logger)
+	if err != nil {
+		logger.Error("Error creating cache client", "error", err)
+		return
+	}
+
 	// Metrics
 	reg := prometheus.NewRegistry()
 	reg.MustRegister(collectors.NewGoCollector())
@@ -54,12 +61,14 @@ func main() {
 
 	metrics := metrics.NewCustomerMetrics(*logger, reg)
 	customerGtw := database.NewCustomerGateway(*logger, db.DB)
-	customerSvc := service.NewCustomerService(*logger, customerGtw)
+	customerCache := cache.NewCustomerCache(*logger, cacheClient)
+	customerSvc := service.NewCustomerService(*logger, customerGtw, customerCache)
 	customerHandler := api.NewCustomerHandler(*logger, metrics, customerSvc)
 
 	r.HandleFunc("/metrics", promHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/v1/customers", customerHandler.GetCustomers).Methods("GET")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")
+	r.HandleFunc("/v2/customers/{id}", customerHandler.V2GetCustomerByID).Methods("GET")
 	r.HandleFunc("/v1/customers", customerHandler.CreateCustomer).Methods("POST")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")

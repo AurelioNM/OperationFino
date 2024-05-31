@@ -3,7 +3,7 @@ CREATE TABLE IF NOT EXISTS customers (
 	name varchar(30) NOT NULL,
 	surname varchar(30) NOT NULL,
 	email varchar(200) UNIQUE NOT NULL,
-	birthdate date NOT NULL,
+	birthdate varchar(10) NOT NULL,
 
 	created_at timestamp NOT NULL,
 	updated_at timestamp,

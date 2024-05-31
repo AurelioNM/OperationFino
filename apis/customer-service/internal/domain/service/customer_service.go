@@ -13,6 +13,8 @@ type CustomerService interface {
 	GetCustomerList(ctx context.Context) ([]*entity.Customer, error)
 	GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
 	V2GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
+	GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error)
+	V2GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error)
 	CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error)
 	UpdateCustomer(ctx context.Context, customer entity.Customer) error
 	DeleteCustomerByID(ctx context.Context, customerID string) error
@@ -55,14 +57,41 @@ func (s *customerService) GetCustomerByID(ctx context.Context, customerID string
 
 func (s *customerService) V2GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error) {
 	s.logger.Info("Getting customer by ID", "ID", customerID, "traceID", ctx.Value("traceID"))
-	customer, err := s.customerCache.GetCachedCustomer(ctx, customerID)
+	customer, err := s.customerCache.ReadCacheByID(ctx, customerID)
 	if err != nil {
 		customer, err = s.customerGtw.GetCustomerByID(ctx, customerID)
 		if err != nil {
 			s.logger.Error("Failed to get customer by ID", "error", err, "traceID", ctx.Value("traceID"))
 			return nil, err
 		}
-		s.customerCache.CreateCustomerCache(ctx, *customer)
+		s.customerCache.WriteCacheByID(ctx, *customer)
+		return customer, nil
+	}
+
+	return customer, nil
+}
+
+func (s *customerService) GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
+	s.logger.Info("Getting customer by email", "email", customerEmail, "traceID", ctx.Value("traceID"))
+	customer, err := s.customerGtw.GetCustomerByEmail(ctx, customerEmail)
+	if err != nil {
+		s.logger.Error("Failed to get customer by email", "error", err, "traceID", ctx.Value("traceID"))
+		return nil, err
+	}
+
+	return customer, nil
+}
+
+func (s *customerService) V2GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
+	s.logger.Info("Getting customer by email", "email", customerEmail, "traceID", ctx.Value("traceID"))
+	customer, err := s.customerCache.ReadCacheByEmail(ctx, customerEmail)
+	if err != nil {
+		customer, err = s.customerGtw.GetCustomerByEmail(ctx, customerEmail)
+		if err != nil {
+			s.logger.Error("Failed to get customer by email", "error", err, "traceID", ctx.Value("traceID"))
+			return nil, err
+		}
+		s.customerCache.WriteCacheByEmail(ctx, *customer)
 		return customer, nil
 	}
 

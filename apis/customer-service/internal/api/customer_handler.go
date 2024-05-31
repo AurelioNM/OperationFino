@@ -20,6 +20,8 @@ type CustomerHandler interface {
 	GetCustomers(w http.ResponseWriter, r *http.Request)
 	GetCustomerByID(w http.ResponseWriter, r *http.Request)
 	V2GetCustomerByID(w http.ResponseWriter, r *http.Request)
+	GetCustomerByEmail(w http.ResponseWriter, r *http.Request)
+	V2GetCustomerByEmail(w http.ResponseWriter, r *http.Request)
 	CreateCustomer(w http.ResponseWriter, r *http.Request)
 	UpdateCustomer(w http.ResponseWriter, r *http.Request)
 	DeleteCustomer(w http.ResponseWriter, r *http.Request)
@@ -71,7 +73,7 @@ func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request
 	vars := mux.Vars(r)
 	id := vars["id"]
 
-	customer, err := h.customerSvc.V2GetCustomerByID(ctx, id)
+	customer, err := h.customerSvc.GetCustomerByID(ctx, id)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/customers/{customerId}", now)
 		return
@@ -101,6 +103,46 @@ func (h *customerHandler) V2GetCustomerByID(w http.ResponseWriter, r *http.Reque
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Customer by ID: %s", id), now, map[string]interface{}{"customer": customer})
+}
+
+func (h *customerHandler) GetCustomerByEmail(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET customer by email request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	email := vars["email"]
+
+	customer, err := h.customerSvc.GetCustomerByEmail(ctx, email)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/customers/email/{customerEmail}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "GET", "/v1/customers/email/{customerEmail}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, fmt.Sprintf("Customer by email: %s", email), now, map[string]interface{}{"customer": customer})
+}
+
+func (h *customerHandler) V2GetCustomerByEmail(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET customer by email request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	email := vars["email"]
+
+	customer, err := h.customerSvc.V2GetCustomerByEmail(ctx, email)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v2/customers/email/{customerEmail}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "GET", "/v2/customers/email/{customerEmail}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, fmt.Sprintf("Customer by email: %s", email), now, map[string]interface{}{"customer": customer})
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {

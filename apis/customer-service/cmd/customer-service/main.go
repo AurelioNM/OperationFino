@@ -69,6 +69,8 @@ func main() {
 	r.HandleFunc("/v1/customers", customerHandler.GetCustomers).Methods("GET")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.GetCustomerByID).Methods("GET")
 	r.HandleFunc("/v2/customers/{id}", customerHandler.V2GetCustomerByID).Methods("GET")
+	r.HandleFunc("/v1/customers/email/{email}", customerHandler.GetCustomerByEmail).Methods("GET")
+	r.HandleFunc("/v2/customers/email/{email}", customerHandler.V2GetCustomerByEmail).Methods("GET")
 	r.HandleFunc("/v1/customers", customerHandler.CreateCustomer).Methods("POST")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")

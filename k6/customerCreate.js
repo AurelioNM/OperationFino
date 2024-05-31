@@ -3,7 +3,7 @@ import { check } from 'k6';
 
 export const options = {
 	vus: 5,
-	duration: '200s',
+	duration: '10m',
 };
 
 export default function() {

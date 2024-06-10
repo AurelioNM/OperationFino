@@ -72,28 +72,11 @@ func (s *customerService) V2GetCustomerByID(ctx context.Context, customerID stri
 }
 
 func (s *customerService) GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
+	s.logger.Debug("Debuging email", "email", customerEmail, "traceID", ctx.Value("traceID"))
+	s.logger.Debug("Once again, debuging email", "email", customerEmail, "traceID", ctx.Value("traceID"))
 	customer, err := s.customerGtw.GetCustomerByEmail(ctx, customerEmail)
 	if err != nil {
-		s.logger.Debug("Debug this shit error", "error", err, "traceID", ctx.Value("traceID"))
-		s.logger.Error("Failed to get customer by email", "error", err, "traceID", ctx.Value("traceID"))
-		return err, err
-	}
-
-	return customer, nil
-}
-
-func (s *customerService) V2GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
-	s.logger.Info("Getting customer by email", "email", customerEmail, "traceID", ctx.Value("traceID"))
-
-	customer, err := s.customerCache.ReadCacheByEmail(ctx, customerEmail)
-	if err != nil {
-		customer, err = s.customerGtw.GetCustomerByEmail(ctx, customerEmail)
-		if err != nil {
-			s.logger.Error("Failed to get customer by email", "error", err, "traceID", ctx.Value("traceID"))
-			return nil, err
-		}
-		s.customerCache.WriteCacheByEmail(ctx, *customer)
-		return customer, nil
+		return nil, err
 	}
 
 	return customer, nil

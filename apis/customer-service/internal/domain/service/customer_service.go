@@ -72,11 +72,11 @@ func (s *customerService) V2GetCustomerByID(ctx context.Context, customerID stri
 }
 
 func (s *customerService) GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
-	s.logger.Info("Getting customer by email", "email", customerEmail, "traceID", ctx.Value("traceID"))
 	customer, err := s.customerGtw.GetCustomerByEmail(ctx, customerEmail)
 	if err != nil {
+		s.logger.Debug("Debug this shit error", "error", err, "traceID", ctx.Value("traceID"))
 		s.logger.Error("Failed to get customer by email", "error", err, "traceID", ctx.Value("traceID"))
-		return nil, err
+		return err, err
 	}
 
 	return customer, nil

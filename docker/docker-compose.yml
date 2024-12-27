@@ -68,39 +68,8 @@ services:
     networks:
       - of-network
 
-  of-elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:7.15.2
-    container_name: of-elasticsearch
-    ports:
-      - '9200:9200'
-      - '9300:9300'
-    environment:
-      - discovery.type=single-node
-    mem_limit: 500M
-    mem_reservation: 200M
-    volumes:
-      - of_elasticsearch_vol:/usr/share/elasticsearch/data
-    networks:
-      - of-network
-
-  of-workshop-postgres:
-    image: postgres
-    container_name: of-workshop-postgres
-    ports:
-      - "5449:5432"
-    environment:
-      - POSTGRES_USER=workshop
-      - POSTGRES_PASSWORD=workshop
-      - POSTGRES_DB=workshop
-    volumes:
-      - of_workshop_postgres_vol:/var/lib/postgresql/data
-    networks:
-      - of-network
-
 volumes:
   of_customer_postgres_vol: {}
-  of_workshop_postgres_vol: {}
-  of_elasticsearch_vol: {}
   of_prometheus_vol: {}
   of_grafana_vol: {}
 

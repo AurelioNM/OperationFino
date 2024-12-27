@@ -1,7 +1,7 @@
 # OperationFino
 
-### Tasks
-- [x] base api
+### Sprint 1 - Tasks
+- [x] base api - customer-service
 - [x] db conn
 - [x] db schema
 - [x] config docker
@@ -9,7 +9,6 @@
 - [x] layers handler, service, resources
 - [x] go Context
 - [x] swagger
-- [ ] learn profiling
 - Observability
     - [x] logs
     - [x] generate metrics
@@ -20,18 +19,26 @@
 	- [x] add reqs by status code dashboard
 	- [x] add reqs rate dashboard
 	- [x] add error dashboard
-- Testing
-	- [x] k6
-	    - [x] basic load tests
-	    - [x] test end to end apis
-	- [ ] Unit test
-	- [ ] Vegeta
-	- [ ] Robot
-	- [ ] Mutation test
-	- [ ] Contract test
+- Tests
+    - [x] k6
+	- [x] basic load tests
+	- [x] test end to end apis
 - Resilience
-	- [ ] Cache
-	- [ ] Circuit Break
-	- [ ] Nginx
+    - [x] Cache - rotas v2
 
+
+### Sprint 2 - Tasks
+- [ ] Definir proximo service
+- [ ] Definir service worker + processamento de arquivos
+- [ ] Definir service com DB nao relacional
+- [ ] Paginacao no customer-service
+- Observability
+    - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
+- Tests
+    - [ ] Robot
+    - [ ] Test Containers
+    - [ ] Vegeta
+- Resilience
+	- [ ] Nginx
+	- [ ] Circuit Break
 

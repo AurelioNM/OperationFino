@@ -14,18 +14,45 @@ services:
     networks:
       - of-network
 
+  of-product-service:
+    build: ../apis/product-service/
+    container_name: of-product-service
+    depends_on:
+      - of-product-postgres
+    ports:
+      - "8002:8002"
+    environment:
+      - DEGUG=true
+    networks:
+      - of-network
+
   of-customer-postgres:
     image: postgres
     container_name: of-customer-postgres
     ports:
       - "5441:5432"
     environment:
+      - POSTGRES_DB=customer-service
       - POSTGRES_USER=customer
       - POSTGRES_PASSWORD=customer
-      - POSTGRES_DB=customer-service
     volumes:
       - ../apis/customer-service/db-schema/:/docker-entrypoint-initdb.d/
       - of_customer_postgres_vol:/var/lib/postgresql/data
+    networks:
+      - of-network
+
+  of-product-postgres:
+    image: postgres
+    container_name: of-product-postgres
+    ports:
+      - "5442:5432"
+    environment:
+      - POSTGRES_DB=product-service
+      - POSTGRES_USER=product
+      - POSTGRES_PASSWORD=product
+    volumes:
+      - ../apis/product-service/db-schema/:/docker-entrypoint-initdb.d/
+      - of_product_postgres_vol:/var/lib/postgresql/data
     networks:
       - of-network
 
@@ -73,6 +100,7 @@ services:
 
 volumes:
   of_customer_postgres_vol: {}
+  of_product_postgres_vol: {}
   of_prometheus_vol: {}
   of_grafana_vol: {}
 

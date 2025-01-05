@@ -19,7 +19,7 @@ type customerGateway struct {
 
 func NewCustomerGateway(l slog.Logger, db *sql.DB) gateway.CustomerGateway {
 	return &customerGateway{
-		logger: *l.With("layer", "customer-gateway"),
+		logger: *l.With("layer", "customer-database"),
 		db:     db,
 	}
 }
@@ -40,12 +40,13 @@ func (g *customerGateway) GetCustomerList(ctx context.Context) ([]*entity.Custom
 		customer := &entity.Customer{}
 		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate, &customer.CreatedAt, &customer.UpdatedAt)
 		if err != nil {
-			g.logger.Error("Error scaning row", "error", err)
+			g.logger.Error("Error scaning row", "error", err, "traceID", ctx.Value("traceID"))
 			return nil, err
 		}
 		customers = append(customers, customer)
 	}
 
+	g.logger.Info("Found customer list on DB", "size", len(customers))
 	return customers, nil
 }
 
@@ -64,7 +65,7 @@ func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string
 		customer := entity.Customer{}
 		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate, &customer.CreatedAt, &customer.UpdatedAt)
 		if err != nil {
-			g.logger.Error("Error scaning row", "error", err)
+			g.logger.Error("Error scaning product row", "error", err)
 			return nil, err
 		}
 		return &customer, nil

@@ -64,7 +64,7 @@ func (h *customerHandler) GetCustomers(w http.ResponseWriter, r *http.Request) {
 	h.metrics.MeasureDuration(now, "GET", "/v1/customers", "200")
 	h.metrics.IncReqByStatusCode("200")
 
-	h.buildResponse(w, "All customers", now, map[string]interface{}{"page_size": len(customers), "page_zcontent": customers})
+	h.buildResponse(w, "All customers", now, map[string]interface{}{"page_size": len(customers), "page_content": customers})
 }
 
 func (h *customerHandler) GetCustomerByID(w http.ResponseWriter, r *http.Request) {

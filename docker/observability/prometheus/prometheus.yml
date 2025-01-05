@@ -13,3 +13,10 @@ scrape_configs:
         labels:
           service: 'of-customer-service'
           instance: 'of-customer-service-local'
+
+  - job_name: 'of-product-service'
+    static_configs:
+      - targets: [ 'of-product-service:8002' ]
+        labels:
+          service: 'of-product-service'
+          instance: 'of-product-service-local'

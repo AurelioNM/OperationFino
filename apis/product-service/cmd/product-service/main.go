@@ -3,6 +3,8 @@ package main
 import (
 	"cmd/product-service/internal/api"
 	"cmd/product-service/internal/domain/service"
+	"cmd/product-service/internal/metrics"
+	"cmd/product-service/internal/pyroscope"
 	"cmd/product-service/internal/resources/database"
 	"fmt"
 	"log"
@@ -14,11 +16,17 @@ import (
 
 	"github.com/gorilla/mux"
 	"github.com/joho/godotenv"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/collectors"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	httpSwagger "github.com/swaggo/http-swagger"
 )
 
 func main() {
-	// TODO pyroscope config
+	// Profiler
+	if pyroscope.StartPyroscope() {
+		defer pyroscope.WaitPyroscope()
+	}
 
 	err := godotenv.Load()
 	if err != nil {
@@ -35,13 +43,17 @@ func main() {
 		return
 	}
 
-	// TODO metrics config
+	// Metrics
+	reg := prometheus.NewRegistry()
+	reg.MustRegister(collectors.NewGoCollector())
+	prometheusHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
+	metrics := metrics.NewProductMetrics(*logger, reg)
 
 	productGtw := database.NewProductGateway(*logger, db.DB)
 	productSvc := service.NewProductService(*logger, productGtw)
-	productHandler := api.NewProductHandler(*logger, productSvc)
+	productHandler := api.NewProductHandler(*logger, metrics, productSvc)
 
-	r := createRouter(productHandler)
+	r := createRouter(prometheusHandler, productHandler)
 	logger.Debug("Starting prodduct-service", "port", os.Getenv("APP_PORT"))
 	go http.ListenAndServe(fmt.Sprintf(":%s", os.Getenv("APP_PORT")), r)
 
@@ -52,9 +64,10 @@ func main() {
 	logger.Debug("Stoping product-service")
 }
 
-func createRouter(productHandler api.ProductHandler) *mux.Router {
+func createRouter(prometheusHandler http.Handler, productHandler api.ProductHandler) *mux.Router {
 	r := mux.NewRouter()
 
+	r.HandleFunc("/metrics", prometheusHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/v1/products", productHandler.GetProducts).Methods("GET")
 	r.HandleFunc("/v1/products/{id}", productHandler.GetProductByID).Methods("GET")
 	r.HandleFunc("/v1/products", productHandler.CreateProduct).Methods("POST")

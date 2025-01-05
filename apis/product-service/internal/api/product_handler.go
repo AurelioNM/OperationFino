@@ -3,6 +3,7 @@ package api
 import (
 	"cmd/product-service/internal/domain/entity"
 	"cmd/product-service/internal/domain/service"
+	"cmd/product-service/internal/metrics"
 	"context"
 	"encoding/json"
 	"fmt"
@@ -22,6 +23,7 @@ type ProductHandler interface {
 
 type productHandler struct {
 	logger     slog.Logger
+	metrics    *metrics.ProductMetrics
 	productSvc service.ProductService
 }
 
@@ -32,9 +34,10 @@ type response struct {
 	Data        map[string]interface{} `json:"data"`
 }
 
-func NewProductHandler(l slog.Logger, s service.ProductService) ProductHandler {
+func NewProductHandler(l slog.Logger, m *metrics.ProductMetrics, s service.ProductService) ProductHandler {
 	return &productHandler{
 		logger:     *l.With("layer", "product-handler"),
+		metrics:    m,
 		productSvc: s,
 	}
 }
@@ -49,6 +52,9 @@ func (h *productHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "GET", "/v1/products", now)
 		return
 	}
+
+	h.metrics.MeasureDuration(now, "GET", "v1/products", "200")
+	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, "All products", now, map[string]interface{}{"page_size": len(products), "page_content": products})
 }
@@ -66,6 +72,9 @@ func (h *productHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/products/{productID}", now)
 		return
 	}
+
+	h.metrics.MeasureDuration(now, "GET", "v1/products{productId}", "200")
+	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Product by ID: %s", id), now, map[string]interface{}{"product": product})
 }
@@ -88,6 +97,9 @@ func (h *productHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	h.metrics.MeasureDuration(now, "POST", "/v1/products", "201")
+	h.metrics.IncReqByStatusCode("201")
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	h.buildResponse(w, "Product created", now, map[string]interface{}{"id": id})
@@ -104,6 +116,9 @@ func (h *productHandler) getContext(r *http.Request) context.Context {
 }
 
 func (h *productHandler) buildErrorResponse(w http.ResponseWriter, error string, statusCode int, method string, uri string, start time.Time) {
+	h.metrics.MeasureDuration(start, method, uri, fmt.Sprint(statusCode))
+	h.metrics.IncReqByStatusCode(fmt.Sprint(statusCode))
+
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(statusCode)
 	h.buildResponse(w, fmt.Sprintf("Error on %s product: %s", method, error), start, map[string]interface{}{})

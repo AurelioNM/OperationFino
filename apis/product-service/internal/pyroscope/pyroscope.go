@@ -2,11 +2,12 @@ package pyroscope
 
 import (
 	"fmt"
-	"github.com/pyroscope-io/client/pyroscope"
 	"os"
 	"path/filepath"
 	"runtime"
 	"time"
+
+	"github.com/pyroscope-io/client/pyroscope"
 )
 
 func StartPyroscope() bool {
@@ -20,13 +21,11 @@ func StartPyroscope() bool {
 		return false
 	}
 
-	// These 2 lines are only required if you're using mutex or block profiling
 	runtime.SetMutexProfileFraction(1)
 	runtime.SetBlockProfileRate(1)
 
 	_, _ = pyroscope.Start(pyroscope.Config{
 		ApplicationName: filepath.Base(name),
-
 		// Replace this with the address of pyroscope server
 		ServerAddress: "http://127.0.0.1:4040",
 

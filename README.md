@@ -31,10 +31,8 @@
 - [ ] Customer service
     - [x] Get by name V1
     - [x] Get by name V2 with cache
-    - [ ] Paginacao 
-- [ ] Definir proximo service
-- [ ] Definir service worker + processamento de arquivos
-- [ ] Definir service com DB nao relacional
+- [ ] Customer service
+    - [ ] CRUD operations
 - Observability
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
 - Tests
@@ -42,6 +40,6 @@
     - [ ] Test Containers
     - [ ] Vegeta
 - Resilience
-	- [ ] Nginx
-	- [ ] Circuit Break
+    - [ ] Nginx
+    - [ ] Circuit Break
 

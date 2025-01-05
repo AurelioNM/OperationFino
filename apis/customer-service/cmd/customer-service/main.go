@@ -27,6 +27,7 @@ import (
 )
 
 func main() {
+	// Profiler
 	if pyroscope.StartPyroscope() {
 		defer pyroscope.WaitPyroscope()
 	}

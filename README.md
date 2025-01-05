@@ -28,10 +28,13 @@
 
 
 ### Sprint 2 - Tasks
+- [ ] Customer service
+    - [x] Get by name V1
+    - [x] Get by name V2 with cache
+    - [ ] Paginacao 
 - [ ] Definir proximo service
 - [ ] Definir service worker + processamento de arquivos
 - [ ] Definir service com DB nao relacional
-- [ ] Paginacao no customer-service
 - Observability
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
 - Tests

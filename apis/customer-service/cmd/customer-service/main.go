@@ -83,6 +83,8 @@ func createRouter(prometheusHandler http.Handler, customerHandler api.CustomerHa
 	r.HandleFunc("/v2/customers/{id}", customerHandler.V2GetCustomerByID).Methods("GET")
 	r.HandleFunc("/v1/customers/email/{email}", customerHandler.GetCustomerByEmail).Methods("GET")
 	r.HandleFunc("/v2/customers/email/{email}", customerHandler.V2GetCustomerByEmail).Methods("GET")
+	r.HandleFunc("/v1/customers/name/{name}", customerHandler.GetCustomerByName).Methods("GET")
+	r.HandleFunc("/v2/customers/name/{name}", customerHandler.V2GetCustomerByName).Methods("GET")
 	r.HandleFunc("/v1/customers", customerHandler.CreateCustomer).Methods("POST")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.UpdateCustomer).Methods("PUT")
 	r.HandleFunc("/v1/customers/{id}", customerHandler.DeleteCustomer).Methods("DELETE")

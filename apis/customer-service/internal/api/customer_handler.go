@@ -22,6 +22,8 @@ type CustomerHandler interface {
 	V2GetCustomerByID(w http.ResponseWriter, r *http.Request)
 	GetCustomerByEmail(w http.ResponseWriter, r *http.Request)
 	V2GetCustomerByEmail(w http.ResponseWriter, r *http.Request)
+	GetCustomerByName(w http.ResponseWriter, r *http.Request)
+	V2GetCustomerByName(w http.ResponseWriter, r *http.Request)
 	CreateCustomer(w http.ResponseWriter, r *http.Request)
 	UpdateCustomer(w http.ResponseWriter, r *http.Request)
 	DeleteCustomer(w http.ResponseWriter, r *http.Request)
@@ -143,6 +145,46 @@ func (h *customerHandler) V2GetCustomerByEmail(w http.ResponseWriter, r *http.Re
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Customer by email: %s", email), now, map[string]interface{}{"customer": customer})
+}
+
+func (h *customerHandler) GetCustomerByName(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET customer by name request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	customer, err := h.customerSvc.GetCustomerByName(ctx, name)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/customers/name/{customerName}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "GET", "/v1/customers/name/{customerName}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, fmt.Sprintf("Customer by name: %s", name), now, map[string]interface{}{"customer": customer})
+}
+
+func (h *customerHandler) V2GetCustomerByName(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET customer by name request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	customer, err := h.customerSvc.V2GetCustomerByName(ctx, name)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/customers/name/{customerName}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "GET", "/v1/customers/name/{customerName}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, fmt.Sprintf("Customer by name: %s", name), now, map[string]interface{}{"customer": customer})
 }
 
 func (h *customerHandler) CreateCustomer(w http.ResponseWriter, r *http.Request) {

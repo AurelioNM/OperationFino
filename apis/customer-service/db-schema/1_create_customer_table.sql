@@ -11,4 +11,4 @@ CREATE TABLE IF NOT EXISTS customers (
 	CONSTRAINT customer_pk PRIMARY KEY (customer_id)
 );
 
--- CREATE INDEX IF NOT EXISTS customers_email_idx ON customers USING btree (email);
+CREATE INDEX IF NOT EXISTS customers_email_idx ON customers USING btree (email);

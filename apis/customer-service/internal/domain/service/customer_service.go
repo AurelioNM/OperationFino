@@ -15,6 +15,8 @@ type CustomerService interface {
 	V2GetCustomerByID(ctx context.Context, customerID string) (*entity.Customer, error)
 	GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error)
 	V2GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error)
+	GetCustomerByName(ctx context.Context, customerName string) (*entity.Customer, error)
+	V2GetCustomerByName(ctx context.Context, customerName string) (*entity.Customer, error)
 	CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error)
 	UpdateCustomer(ctx context.Context, customer entity.Customer) error
 	DeleteCustomerByID(ctx context.Context, customerID string) error
@@ -93,6 +95,35 @@ func (s *customerService) V2GetCustomerByEmail(ctx context.Context, customerEmai
 			return nil, err
 		}
 		s.customerCache.WriteCacheByEmail(ctx, *customer)
+		return customer, nil
+	}
+
+	return customer, nil
+}
+
+func (s *customerService) GetCustomerByName(ctx context.Context, customerName string) (*entity.Customer, error) {
+	s.logger.Info("Getting customer by name", "name", customerName, "traceID", ctx.Value("traceID"))
+	customer, err := s.customerGtw.GetCustomerByName(ctx, customerName)
+	if err != nil {
+		s.logger.Error("Failed to get customer by name", "error", err, "traceID", ctx.Value("traceID"))
+		return nil, err
+	}
+
+	return customer, nil
+}
+
+func (s *customerService) V2GetCustomerByName(ctx context.Context, customerName string) (*entity.Customer, error) {
+	s.logger.Info("Getting customer by name", "name", customerName, "traceID", ctx.Value("traceID"))
+
+	customer, err := s.customerCache.ReadCacheByName(ctx, customerName)
+	if err != nil {
+		customer, err = s.customerGtw.GetCustomerByName(ctx, customerName)
+		if err != nil {
+			s.logger.Error("Failed to get customer by name", "error", err, "traceID", ctx.Value("traceID"))
+			return nil, err
+		}
+
+		s.customerCache.WriteCacheByName(ctx, *customer)
 		return customer, nil
 	}
 

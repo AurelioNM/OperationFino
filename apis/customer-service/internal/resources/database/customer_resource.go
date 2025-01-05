@@ -70,7 +70,7 @@ func (g *customerGateway) GetCustomerByID(ctx context.Context, customerID string
 		return &customer, nil
 	}
 
-	return nil, fmt.Errorf("No customer found ID=%s", customerID)
+	return nil, fmt.Errorf("No customer found with ID=%s", customerID)
 }
 
 func (g *customerGateway) GetCustomerByEmail(ctx context.Context, customerEmail string) (*entity.Customer, error) {
@@ -94,7 +94,31 @@ func (g *customerGateway) GetCustomerByEmail(ctx context.Context, customerEmail 
 		return &customer, nil
 	}
 
-	return nil, fmt.Errorf("No customer found email=%s", customerEmail)
+	return nil, fmt.Errorf("No customer found with email=%s", customerEmail)
+}
+
+func (g *customerGateway) GetCustomerByName(ctx context.Context, customerName string) (*entity.Customer, error) {
+	g.logger.Debug("Getting customer by name from db", "name", customerName, "traceID", ctx.Value("traceID"))
+	query := "SELECT customer_id, name, surname, email, birthdate, created_at, updated_at FROM customers WHERE name = $1 LIMIT 1;"
+
+	rows, err := g.db.Query(query, customerName)
+	if err != nil {
+		g.logger.Error("Failed to get customer by name from db", "error", err, "traceID", ctx.Value("traceID"))
+		return nil, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		customer := entity.Customer{}
+		err = rows.Scan(&customer.ID, &customer.Name, &customer.Surname, &customer.Email, &customer.Birthdate, &customer.CreatedAt, &customer.UpdatedAt)
+		if err != nil {
+			g.logger.Error("Error scaning row", "error", err)
+			return nil, err
+		}
+		return &customer, nil
+	}
+
+	return nil, fmt.Errorf("No customer found with name=%s", customerName)
 }
 
 func (g *customerGateway) CreateCustomer(ctx context.Context, customer entity.Customer) (*string, error) {

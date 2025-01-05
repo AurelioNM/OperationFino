@@ -1,17 +1,17 @@
 openapi: 3.0.0
 info:
-  title: Customer API
-  description: API for managing customers
+  title: Product API
+  description: API for managing products
   version: 1.0.0
 paths:
-  "/v1/customers":
+  "/v1/products":
     get:
-      summary: Get all customers
+      summary: Get all products
       tags:
-        - CustomersV1
+        - ProductsV1
       responses:
         '200':
-          description: A list of customers
+          description: A list of products
           content:
             application/json:
               schema:
@@ -32,20 +32,20 @@ paths:
                       page_content:
                         type: array
                         items:
-                          $ref: '#/components/schemas/Customer'
+                          $ref: '#/components/schemas/Product'
     post:
       tags:
-        - CustomersV1
-      summary: Create a new customer
+        - ProductsV1
+      summary: Create a new product
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CustomerWrite'
+              $ref: '#/components/schemas/ProductWrite'
       responses:
         '201':
-          description: Customer created
+          description: Product created
           content:
             application/json:
               schema:
@@ -63,12 +63,13 @@ paths:
                     properties:
                       id:
                         type: string
+                        example: "01HZ7E8GR7SBPV9F96XRR5HCW2"
 
-  "/v1/customers/{id}":
+  "/v1/products/{id}":
     get:
       tags:
-        - CustomersV1
-      summary: Get a customer by ID
+        - ProductsV1
+      summary: Get a product by ID
       parameters:
         - name: id
           in: path
@@ -77,7 +78,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Customer details
+          description: Product details
           content:
             application/json:
               schema:
@@ -93,12 +94,12 @@ paths:
                   data:
                     type: object
                     properties:
-                      customer:
-                        $ref: '#/components/schemas/Customer'
+                      product:
+                        $ref: '#/components/schemas/Product'
     put:
       tags:
-        - CustomersV1
-      summary: Update a customer by ID
+        - ProductsV1
+      summary: Update a product by ID
       parameters:
         - name: id
           in: path
@@ -110,10 +111,10 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/CustomerWrite'
+              $ref: '#/components/schemas/ProductWrite'
       responses:
         '200':
-          description: Customer updated
+          description: product updated
           content:
             application/json:
               schema:
@@ -133,8 +134,8 @@ paths:
                         type: string
     delete:
       tags:
-        - CustomersV1
-      summary: Delete a customer by ID
+        - ProductsV1
+      summary: Delete a product by ID
       parameters:
         - name: id
           in: path
@@ -143,7 +144,7 @@ paths:
             type: string
       responses:
         '200':
-          description: Customer deleted
+          description: product deleted
           content:
             application/json:
               schema:
@@ -159,25 +160,25 @@ paths:
 
 components:
   schemas:
-    Customer:
+    Product:
       type: object
       properties:
-        customer_id:
+        product_id:
           type: string
           example: "01HZ7E8GR7SBPV9F96XRR5HCW2"
         name:
           type: string
-          example: "Juninho"
-        surname:
+          example: "Notebook"
+        description:
           type: string
-          example: "Doença"
-        email:
-          type: string
-          example: "doenca@gmail.com"
-        birthdate:
-          type: string
-          format: date
-          example: "1990-03-07"
+          example: "Notebook para os doencas do Fino"
+        price:
+          type: number
+          fromat: float
+          example: 2899.99
+        quantity:
+          type: number
+          example: 10
         created_at:
           type: string
           format: date-time
@@ -185,20 +186,20 @@ components:
           type: string
           format: date-time
           nullable: true
-    CustomerWrite:
+    ProductWrite:
       type: object
       properties:
         name:
           type: string
-          example: "Juninho"
-        surname:
+          example: "Notebook"
+        description:
           type: string
-          example: "Doença"
-        email:
-          type: string
-          example: "doenca@gmail.com"
-        birthdate:
-          type: string
-          format: date
-          example: "1990-03-07"
+          example: "Notebook para os doencas do Fino"
+        price:
+          type: number
+          fromat: float
+          example: 2899.99
+        quantity:
+          type: number
+          example: 10
 

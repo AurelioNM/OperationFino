@@ -8,6 +8,6 @@ COPY ./.env /app
 
 COPY ./swagger.yml /app
 
-EXPOSE 8001
+EXPOSE 8002
 
 CMD [ "/app/product-service" ]

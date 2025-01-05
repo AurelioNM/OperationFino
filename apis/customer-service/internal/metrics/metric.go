@@ -26,7 +26,7 @@ func NewCustomerMetrics(l slog.Logger, reg prometheus.Registerer) *CustomerMetri
 		Duration: prometheus.NewHistogramVec(prometheus.HistogramOpts{
 			Name:    "request_duration_seconds",
 			Help:    "Duration of request",
-			Buckets: []float64{0.0, 0.002, 0.003, 0.005, 0.007, 0.009, 0.01, 0.015, 0.02, 0.023, 0.025, 0.027, 0.029, 0.03, 0.031, 0.033, 0.035, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3}},
+			Buckets: []float64{0.0, 0.001, 0.002, 0.003, 0.005, 0.007, 0.009, 0.01, 0.015, 0.02, 0.023, 0.025, 0.027, 0.029, 0.03, 0.031, 0.033, 0.035, 0.04, 0.05, 0.1, 0.15, 0.2, 0.25, 0.3}},
 			[]string{"service", "status", "method", "uri"}),
 	}
 

@@ -37,6 +37,7 @@
     - [ ] Load tests
 - Observability
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
+    - [ ] Melhorar metrica e dash de ReqByStatusCode
 - Tests
     - [ ] Robot
     - [ ] Test Containers

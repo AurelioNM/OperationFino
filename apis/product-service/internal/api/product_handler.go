@@ -55,7 +55,7 @@ func (h *productHandler) GetProducts(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	h.metrics.MeasureDuration(now, "GET", "v1/products", "200")
+	h.metrics.MeasureDuration(now, "GET", "/v1/products", "200")
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, "All products", now, map[string]interface{}{"page_size": len(products), "page_content": products})
@@ -71,11 +71,11 @@ func (h *productHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 
 	product, err := h.productSvc.GetProductByID(ctx, id)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/products/{productID}", now)
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/products/{productId}", now)
 		return
 	}
 
-	h.metrics.MeasureDuration(now, "GET", "v1/products{productId}", "200")
+	h.metrics.MeasureDuration(now, "GET", "/v1/products/{productId}", "200")
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Product by ID: %s", id), now, map[string]interface{}{"product": product})
@@ -118,18 +118,18 @@ func (h *productHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
 
 	err := json.NewDecoder(r.Body).Decode(&product)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "PUT", "/v1/products", now)
+		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "PUT", "/v1/products/{productId}", now)
 		return
 	}
 	product.ID = &id
 
 	err = h.productSvc.UpdateProduct(ctx, product)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "PUT", "/v1/products", now)
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "PUT", "/v1/products/{productId}", now)
 		return
 	}
 
-	h.metrics.MeasureDuration(now, "PUT", "/v1/products", "200")
+	h.metrics.MeasureDuration(now, "PUT", "/v1/products/{productId}", "200")
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, "Product updated", now, map[string]interface{}{"id": id})

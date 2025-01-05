@@ -71,6 +71,8 @@ func createRouter(prometheusHandler http.Handler, productHandler api.ProductHand
 	r.HandleFunc("/v1/products", productHandler.GetProducts).Methods("GET")
 	r.HandleFunc("/v1/products/{id}", productHandler.GetProductByID).Methods("GET")
 	r.HandleFunc("/v1/products", productHandler.CreateProduct).Methods("POST")
+	r.HandleFunc("/v1/products/{id}", productHandler.UpdateProduct).Methods("PUT")
+	r.HandleFunc("/v1/products/{id}", productHandler.DeleteProduct).Methods("DELETE")
 
 	r.PathPrefix("/products/doc/").Handler(httpSwagger.Handler(
 		httpSwagger.URL("/swagger.yml"),

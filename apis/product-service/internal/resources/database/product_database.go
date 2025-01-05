@@ -90,3 +90,41 @@ func (g *productGateway) CreateProduct(ctx context.Context, product entity.Produ
 
 	return &id, nil
 }
+
+func (g *productGateway) UpdateProduct(ctx context.Context, product entity.Product) error {
+	g.logger.Debug("Updating product on db", "ID", product.ID, "traceID", ctx.Value("traceID"))
+
+	result, err := g.db.Exec(`UPDATE products SET name = $1, description = $2, price = $3, quantity = $4, updated_at = 'NOW()' WHERE product_id = $5;`,
+		product.Name,
+		product.Description,
+		product.Price,
+		product.Quantity,
+		product.ID)
+	if err != nil {
+		g.logger.Error("Failed to update product on db", "error", err, "traceID", ctx.Value("traceID"))
+		return err
+	}
+
+	return validateIfRowWasAffected(result, *product.ID)
+}
+
+func (g *productGateway) DeleteProductByID(ctx context.Context, productID string) error {
+	g.logger.Debug("Deleting product on db", "ID", productID, "traceID", ctx.Value("traceID"))
+
+	result, err := g.db.Exec(`DELETE FROM products WHERE product_id = $1;`, productID)
+	if err != nil {
+		g.logger.Error("Failed to update product on db", "error", err, "traceID", ctx.Value("traceID"))
+		return err
+	}
+
+	return validateIfRowWasAffected(result, productID)
+}
+
+func validateIfRowWasAffected(result sql.Result, productID string) error {
+	rows, err := result.RowsAffected()
+	if rows == 0 || err != nil {
+		return fmt.Errorf("Product not found ID=%s", productID)
+	}
+
+	return nil
+}

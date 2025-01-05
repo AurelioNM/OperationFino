@@ -153,7 +153,7 @@ func (g *customerGateway) UpdateCustomer(ctx context.Context, customer entity.Cu
 		return err
 	}
 
-	return validateIfCustomerExists(result, *customer.ID)
+	return validateIfRowWasAffected(result, *customer.ID)
 }
 
 func (g *customerGateway) DeleteCustomerByID(ctx context.Context, customerID string) error {
@@ -165,10 +165,10 @@ func (g *customerGateway) DeleteCustomerByID(ctx context.Context, customerID str
 		return err
 	}
 
-	return validateIfCustomerExists(result, customerID)
+	return validateIfRowWasAffected(result, customerID)
 }
 
-func validateIfCustomerExists(result sql.Result, customerID string) error {
+func validateIfRowWasAffected(result sql.Result, customerID string) error {
 	rows, _ := result.RowsAffected()
 	if rows == 0 {
 		return fmt.Errorf("Customer not found ID=%s", customerID)

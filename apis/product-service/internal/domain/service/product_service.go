@@ -11,6 +11,8 @@ type ProductService interface {
 	GetProductList(ctx context.Context) ([]*entity.Product, error)
 	GetProductByID(ctx context.Context, productID string) (*entity.Product, error)
 	CreateProduct(ctx context.Context, product entity.Product) (*string, error)
+	UpdateProduct(ctx context.Context, product entity.Product) error
+	DeleteProductByID(ctx context.Context, productID string) error
 }
 
 type productService struct {
@@ -20,7 +22,7 @@ type productService struct {
 
 func NewProductService(l slog.Logger, g gateway.ProductGateway) ProductService {
 	return &productService{
-		logger:     *l.With("layer", "customer-service"),
+		logger:     *l.With("layer", "product-service"),
 		productGtw: g,
 	}
 }
@@ -55,4 +57,26 @@ func (s *productService) CreateProduct(ctx context.Context, product entity.Produ
 	}
 
 	return id, nil
+}
+
+func (s *productService) UpdateProduct(ctx context.Context, product entity.Product) error {
+	s.logger.Info("Updating product", "data", product)
+	err := s.productGtw.UpdateProduct(ctx, product)
+	if err != nil {
+		s.logger.Error("Failed to update product by ID", "error", err, "traceID", ctx.Value("traceID"))
+		return err
+	}
+
+	return nil
+}
+
+func (s *productService) DeleteProductByID(ctx context.Context, productID string) error {
+	s.logger.Info("Deleting product by ID", "ID", productID)
+	err := s.productGtw.DeleteProductByID(ctx, productID)
+	if err != nil {
+		s.logger.Error("Failed to delete product by ID", "error", err, "traceID", ctx.Value("traceID"))
+		return err
+	}
+
+	return nil
 }

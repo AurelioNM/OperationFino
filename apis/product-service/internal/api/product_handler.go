@@ -19,6 +19,8 @@ type ProductHandler interface {
 	GetProducts(w http.ResponseWriter, r *http.Request)
 	GetProductByID(w http.ResponseWriter, r *http.Request)
 	CreateProduct(w http.ResponseWriter, r *http.Request)
+	UpdateProduct(w http.ResponseWriter, r *http.Request)
+	DeleteProduct(w http.ResponseWriter, r *http.Request)
 }
 
 type productHandler struct {
@@ -103,6 +105,54 @@ func (h *productHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	h.buildResponse(w, "Product created", now, map[string]interface{}{"id": id})
+}
+
+func (h *productHandler) UpdateProduct(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("PUT product by ID request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+	var product entity.Product
+
+	err := json.NewDecoder(r.Body).Decode(&product)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "PUT", "/v1/products", now)
+		return
+	}
+	product.ID = &id
+
+	err = h.productSvc.UpdateProduct(ctx, product)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "PUT", "/v1/products", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "PUT", "/v1/products", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, "Product updated", now, map[string]interface{}{"id": id})
+}
+
+func (h *productHandler) DeleteProduct(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("DELETE product by ID request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	err := h.productSvc.DeleteProductByID(ctx, id)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "DELETE", "/v1/products/{productId}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "DELETE", "/v1/products/{productId}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, "Product deleted", now, map[string]interface{}{})
 }
 
 func (h *productHandler) getContext(r *http.Request) context.Context {

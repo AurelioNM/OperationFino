@@ -31,8 +31,10 @@
 - [ ] Customer service
     - [x] Get by name V1
     - [x] Get by name V2 with cache
-- [ ] Customer service
-    - [ ] CRUD operations
+    - [ ] Finish unit tests
+- [ ] Product service
+    - [X] CRUD operations
+    - [ ] Load tests
 - Observability
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
 - Tests

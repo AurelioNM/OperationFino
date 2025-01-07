@@ -1,0 +1,116 @@
+openapi: 3.0.0
+info:
+  title: Order API
+  description: API for managing orders
+  version: 1.0.0
+paths:
+  "/v1/orders":
+    post:
+      tags:
+        - OrdersV1
+      summary: Create a new order
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrderWrite'
+      responses:
+        '201':
+          description: Order created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      id:
+                        type: string
+                        example: "01HZ7E8GR7SBPV9F96XRR5HCW2"
+
+  "/v1/orders/{id}":
+    get:
+      tags:
+        - OrdersV1
+      summary: Get a order by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Order details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                  timestamp:
+                    type: string
+                    format: date-time
+                  elapsed_time:
+                    type: string
+                  data:
+                    type: object
+                    properties:
+                      order:
+                        $ref: '#/components/schemas/Order'
+
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        order_id:
+          type: string
+          example: "01HZ7E8GR7SBPV9F96XRR5HCW2"
+        name:
+          type: string
+          example: "Notebook"
+        description:
+          type: string
+          example: "Notebook para os doencas do Fino"
+        price:
+          type: number
+          fromat: float
+          example: 2899.99
+        quantity:
+          type: number
+          example: 10
+        created_at:
+          type: string
+          format: date-time
+        updated_at:
+          type: string
+          format: date-time
+          nullable: true
+    OrderWrite:
+      type: object
+      properties:
+        name:
+          type: string
+          example: "Notebook"
+        description:
+          type: string
+          example: "Notebook para os doencas do Fino"
+        price:
+          type: number
+          fromat: float
+          example: 2899.99
+        quantity:
+          type: number
+          example: 10
+

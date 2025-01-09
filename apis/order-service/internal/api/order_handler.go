@@ -66,7 +66,7 @@ func (h *orderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	ctx := h.getContext(r)
 	h.logger.Debug("POST order request", "traceID", ctx.Value("traceID"))
 
-	var order entity.Order
+	var order *entity.OrderRequest
 	err := json.NewDecoder(r.Body).Decode(&order)
 	if err != nil {
 		h.buildErrorResponse(w, err.Error(), http.StatusBadRequest, "POST", "/v1/orders", now)

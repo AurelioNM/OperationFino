@@ -18,6 +18,7 @@ import (
 type ProductHandler interface {
 	GetProducts(w http.ResponseWriter, r *http.Request)
 	GetProductByID(w http.ResponseWriter, r *http.Request)
+	GetProductByName(w http.ResponseWriter, r *http.Request)
 	CreateProduct(w http.ResponseWriter, r *http.Request)
 	UpdateProduct(w http.ResponseWriter, r *http.Request)
 	DeleteProduct(w http.ResponseWriter, r *http.Request)
@@ -79,6 +80,26 @@ func (h *productHandler) GetProductByID(w http.ResponseWriter, r *http.Request) 
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Product by ID: %s", id), now, map[string]interface{}{"product": product})
+}
+
+func (h *productHandler) GetProductByName(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET product by name request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	name := vars["name"]
+
+	product, err := h.productSvc.GetProductByName(ctx, name)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/products/name/{name}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "GET", "/v1/products/name/{name}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, fmt.Sprintf("Product by Name: %s", name), now, map[string]interface{}{"product": product})
 }
 
 func (h *productHandler) CreateProduct(w http.ResponseWriter, r *http.Request) {

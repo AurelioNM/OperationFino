@@ -10,6 +10,7 @@ import (
 type ProductService interface {
 	GetProductList(ctx context.Context) ([]*entity.Product, error)
 	GetProductByID(ctx context.Context, productID string) (*entity.Product, error)
+	GetProductByName(ctx context.Context, productName string) (*entity.Product, error)
 	CreateProduct(ctx context.Context, product entity.Product) (*string, error)
 	UpdateProduct(ctx context.Context, product entity.Product) error
 	DeleteProductByID(ctx context.Context, productID string) error
@@ -42,6 +43,17 @@ func (s *productService) GetProductByID(ctx context.Context, productID string) (
 	product, err := s.productGtw.GetProductByID(ctx, productID)
 	if err != nil {
 		s.logger.Error("Failed to get product by ID", "error", err, "traceID", ctx.Value("traceID"))
+		return nil, err
+	}
+
+	return product, nil
+}
+
+func (s *productService) GetProductByName(ctx context.Context, productName string) (*entity.Product, error) {
+	s.logger.Info("Getting product by name", "productName", productName, "traceID", ctx.Value("traceID"))
+	product, err := s.productGtw.GetProductByName(ctx, productName)
+	if err != nil {
+		s.logger.Error("Failed to get product by name", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
 

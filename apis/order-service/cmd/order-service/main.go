@@ -5,6 +5,7 @@ import (
 	"cmd/order-service/internal/domain/service"
 	"cmd/order-service/internal/metrics"
 	"cmd/order-service/internal/pyroscope"
+	"cmd/order-service/internal/resources/client"
 	"cmd/order-service/internal/resources/database"
 	"fmt"
 	"log"
@@ -37,11 +38,7 @@ func main() {
 		Level: slog.LevelDebug,
 	}))
 
-	db, err := database.CreateDBConnPool(*logger)
-	if err != nil {
-		logger.Error("Error creating DB", "error", err)
-		return
-	}
+	// TODO db conn
 
 	// Metrics
 	reg := prometheus.NewRegistry()
@@ -49,8 +46,10 @@ func main() {
 	prometheusHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
 	metrics := metrics.NewOrderMetrics(*logger, reg)
 
-	orderGtw := database.NewOrderGateway(*logger, db.DB)
-	orderSvc := service.NewOrderService(*logger, orderGtw)
+	customerGtw := client.NewCustomerGateway(*logger, metrics)
+	productGtw := client.NewProductGateway(*logger, metrics)
+	orderGtw := database.NewOrderGateway(*logger)
+	orderSvc := service.NewOrderService(*logger, orderGtw, customerGtw, productGtw)
 	orderHandler := api.NewOrderHandler(*logger, metrics, orderSvc)
 
 	r := createRouter(prometheusHandler, orderHandler)

@@ -6,6 +6,6 @@ import (
 )
 
 type OrderGateway interface {
-	GetOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
+	GetOrderByID(ctx context.Context, orderID *string) (*entity.Order, error)
 	CreateOrder(ctx context.Context, order *entity.Order) (*string, error)
 }

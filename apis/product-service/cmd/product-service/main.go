@@ -69,6 +69,7 @@ func createRouter(prometheusHandler http.Handler, productHandler api.ProductHand
 
 	r.HandleFunc("/metrics", prometheusHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/v1/products", productHandler.GetProducts).Methods("GET")
+	r.HandleFunc("/v1/products/name/{name}", productHandler.GetProductByName).Methods("GET")
 	r.HandleFunc("/v1/products/{id}", productHandler.GetProductByID).Methods("GET")
 	r.HandleFunc("/v1/products", productHandler.CreateProduct).Methods("POST")
 	r.HandleFunc("/v1/products/{id}", productHandler.UpdateProduct).Methods("PUT")

@@ -26,6 +26,16 @@ services:
     networks:
       - of-network
 
+  of-order-service:
+    build: ../apis/order-service/
+    container_name: of-order-service
+    ports:
+      - "8003:8003"
+    environment:
+      - DEGUG=true
+    networks:
+      - of-network
+
   of-customer-postgres:
     image: postgres
     container_name: of-customer-postgres

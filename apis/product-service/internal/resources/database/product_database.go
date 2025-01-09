@@ -73,6 +73,30 @@ func (g *productGateway) GetProductByID(ctx context.Context, productID string) (
 	return nil, fmt.Errorf("No product found with ID=%s", productID)
 }
 
+func (g *productGateway) GetProductByName(ctx context.Context, productName string) (*entity.Product, error) {
+	g.logger.Debug("Getting product by name from db", "productName", productName, "traceID", ctx.Value("traceID"))
+	query := "SELECT product_id, name, description, price, quantity, created_at, updated_at FROM products WHERE name = $1;"
+
+	rows, err := g.db.Query(query, productName)
+	if err != nil {
+		g.logger.Error("Failed to get product by name from db", "error", err, "traceID", ctx.Value("traceID"))
+		return nil, err
+	}
+
+	defer rows.Close()
+	for rows.Next() {
+		product := entity.Product{}
+		err = rows.Scan(&product.ID, &product.Name, &product.Description, &product.Price, &product.Quantity, &product.CreatedAt, &product.UpdatedAt)
+		if err != nil {
+			g.logger.Error("Error scaning product row", "error", err)
+			return nil, err
+		}
+		return &product, nil
+	}
+
+	return nil, fmt.Errorf("No product found with name=%s", productName)
+}
+
 func (g *productGateway) CreateProduct(ctx context.Context, product entity.Product) (*string, error) {
 	g.logger.Debug("Inserting product into DB", "name", product.Name, "traceID", ctx.Value("traceID"))
 

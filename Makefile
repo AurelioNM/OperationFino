@@ -8,6 +8,11 @@ run-product:
 		&& go build -o bin/ ./cmd/product-service \
 		&& docker-compose -f ../../docker/docker-compose.yml up --build of-product-service
 
+run-order:
+	clear && cd ./apis/order-service/ \
+		&& go build -o bin/ ./cmd/order-service \
+		&& docker-compose -f ../../docker/docker-compose.yml up --build of-order-service
+
 test-customer:
 	cd ./apis/customer-service \
 		&& go test -v ./... && cd -

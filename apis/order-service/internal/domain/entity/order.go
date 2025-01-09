@@ -1,10 +1,13 @@
 package entity
 
-import "time"
+import (
+	"cmd/order-service/internal/resources/client/dto"
+	"time"
+)
 
 type OrderRequest struct {
-	CustomerEmail string                `json:"name"`
-	Products      []OrderRequestProduct `json:"description"`
+	CustomerEmail string                `json:"customer_email"`
+	Products      []OrderRequestProduct `json:"products"`
 }
 
 type OrderRequestProduct struct {
@@ -13,23 +16,9 @@ type OrderRequestProduct struct {
 }
 
 type Order struct {
-	ID        *string    `json:"order_id" db:"order_id"`
-	Customer  Customer   `json:"customer" db:"customer"`
-	Products  []Product  `json:"products" db:"products"`
-	CreatedAt time.Time  `json:"created_at" db:"created_at"`
-	UpdatedAt *time.Time `json:"updated_at" db:"updated_at"`
-}
-
-type Product struct {
-	ID          *string `json:"order_id" db:"order_id"`
-	Name        string  `json:"name" db:"name"`
-	Description string  `json:"description" db:"description"`
-	Price       float64 `json:"price" db:"price"`
-	Quantity    int64   `json:"quantity" db:"quantity"`
-}
-
-type Customer struct {
-	ID    *string `json:"customer_id" db:"customer_id"`
-	Name  string  `json:"name" db:"name"`
-	Email string  `json:"email" db:"email"`
+	ID        *string       `json:"order_id" db:"order_id"`
+	Customer  dto.Customer  `json:"customer" db:"customer"`
+	Products  []dto.Product `json:"products" db:"products"`
+	CreatedAt time.Time     `json:"created_at" db:"created_at"`
+	UpdatedAt *time.Time    `json:"updated_at" db:"updated_at"`
 }

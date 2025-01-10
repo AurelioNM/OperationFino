@@ -147,7 +147,7 @@ func (g *productGateway) DeleteProductByID(ctx context.Context, productID string
 func validateIfRowWasAffected(result sql.Result, productID string) error {
 	rows, err := result.RowsAffected()
 	if rows == 0 || err != nil {
-		return fmt.Errorf("Product not found ID=%s", productID)
+		return fmt.Errorf("Product not found with ID=%s", productID)
 	}
 
 	return nil

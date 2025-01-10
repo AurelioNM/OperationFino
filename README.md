@@ -34,11 +34,18 @@
     - [ ] Finish unit tests
 - [ ] Product service
     - [X] CRUD operations
+    - [X] Load tests
+    - [X] Profiler and Metrics config
+- [ ] Order service
+    - [X] External requests to product and customer
+    - [X] CRUD operations
     - [ ] Load tests
 - Observability
+    - [ ] Add metricas na camada de DB
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
     - [ ] Melhorar metrica e dash de ReqByStatusCode
 - Tests
+    - [ ] Add /utils no k6 para funcoes comuns entre os testes
     - [ ] Robot
     - [ ] Test Containers
     - [ ] Vegeta

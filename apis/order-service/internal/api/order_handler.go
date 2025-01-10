@@ -19,6 +19,7 @@ type OrderHandler interface {
 	GetOrderByID(w http.ResponseWriter, r *http.Request)
 	GetOrdersByCustomerID(w http.ResponseWriter, r *http.Request)
 	CreateOrder(w http.ResponseWriter, r *http.Request)
+	DeleteOrderByID(w http.ResponseWriter, r *http.Request)
 }
 
 type orderHandler struct {
@@ -107,6 +108,26 @@ func (h *orderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(http.StatusCreated)
 	h.buildResponse(w, "Order created", now, map[string]interface{}{"id": id})
+}
+
+func (h *orderHandler) DeleteOrderByID(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("DELETE order by ID request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	id := vars["id"]
+
+	err := h.orderSvc.DeleteOrderByID(ctx, id)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "DELETE", "/v1/orders/{orderId}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "DELETE", "/v1/orders/{orderId}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, "Product deleted", now, map[string]interface{}{})
 }
 
 func (h *orderHandler) getContext(r *http.Request) context.Context {

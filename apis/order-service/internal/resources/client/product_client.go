@@ -10,6 +10,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type productGateway struct {
@@ -27,12 +28,14 @@ func NewProductGateway(l slog.Logger, m *metrics.OrderMetrics) gateway.ProductGa
 func (g *productGateway) GetProductByName(ctx context.Context, productName *string) (*dto.Product, error) {
 	g.logger.Info("Calling product-service to get on getProductByName", "productName", productName, "traceID", ctx.Value("traceID"))
 	url := fmt.Sprintf("http://of-product-service:8002/v1/products/name/%s", *productName)
+	now := time.Now()
 
 	res, err := http.Get(url)
 	if err != nil {
 		g.logger.Error("Product-service request failed", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
+	g.metrics.MeasureExternalDuration(now, "product-service", "GET", "/v1/products/name/{name}", "200")
 
 	body, err := g.getBodyFromResponse(ctx, res)
 	if err != nil {

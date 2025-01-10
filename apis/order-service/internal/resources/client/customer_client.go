@@ -10,6 +10,7 @@ import (
 	"io"
 	"log/slog"
 	"net/http"
+	"time"
 )
 
 type customerGateway struct {
@@ -27,12 +28,14 @@ func NewCustomerGateway(l slog.Logger, m *metrics.OrderMetrics) gateway.Customer
 func (g *customerGateway) GetCustomerByEmail(ctx context.Context, customerEmail *string) (*dto.Customer, error) {
 	g.logger.Info("Calling customer-service to get getCustomerByEmail", "customerEmail", customerEmail, "traceID", ctx.Value("traceID"))
 	url := fmt.Sprintf("http://of-customer-service:8001/v2/customers/email/%s", *customerEmail)
+	now := time.Now()
 
 	res, err := http.Get(url)
 	if err != nil {
 		g.logger.Error("Customer-service request failed", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
+	g.metrics.MeasureExternalDuration(now, "customer-service", "GET", "/v2/customers/email/{email}", "200")
 
 	body, err := g.getBodyFromResponse(ctx, res)
 	if err != nil {

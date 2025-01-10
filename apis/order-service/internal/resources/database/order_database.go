@@ -4,6 +4,7 @@ import (
 	"cmd/order-service/internal/domain/entity"
 	"cmd/order-service/internal/domain/gateway"
 	"context"
+	"fmt"
 	"log/slog"
 
 	"go.mongodb.org/mongo-driver/bson"
@@ -76,4 +77,24 @@ func (g *orderGateway) CreateOrder(ctx context.Context, order *entity.Order) (*s
 
 	g.logger.Info("Sucessfull insert of order into DB", "insertedID", insertResult.InsertedID, "traceID", ctx.Value("traceID"))
 	return order.ID, nil
+}
+
+func (g *orderGateway) DeleteOrderByID(ctx context.Context, orderID *string) error {
+	g.logger.Debug("Deleting order by ID from DB", "ID", orderID, "traceID", ctx.Value("traceID"))
+	collection := g.db.Database("order-service").Collection("order")
+
+	filter := bson.M{"id": orderID}
+
+	deletedResult, err := collection.DeleteOne(ctx, filter)
+	if err != nil {
+		g.logger.Error("Failed to find order by ID in DB", "error", err, "traceID", ctx.Value("traceID"))
+		return err
+	}
+
+	if deletedResult.DeletedCount == 0 {
+		g.logger.Error("Order not found by ID", "error", err, "traceID", ctx.Value("traceID"))
+		return fmt.Errorf("Order not found with ID=%s", *orderID)
+	}
+
+	return nil
 }

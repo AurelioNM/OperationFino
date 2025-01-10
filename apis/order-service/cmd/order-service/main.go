@@ -72,6 +72,7 @@ func createRouter(prometheusHandler http.Handler, orderHandler api.OrderHandler)
 
 	r.HandleFunc("/metrics", prometheusHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/v1/orders/{id}", orderHandler.GetOrderByID).Methods("GET")
+	r.HandleFunc("/v1/orders/{id}", orderHandler.DeleteOrderByID).Methods("DELETE")
 	r.HandleFunc("/v1/orders/customers/{customerID}", orderHandler.GetOrdersByCustomerID).Methods("GET")
 	r.HandleFunc("/v1/orders", orderHandler.CreateOrder).Methods("POST")
 

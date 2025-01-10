@@ -15,6 +15,7 @@ type OrderService interface {
 	GetOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
 	GetOrdersByCustomerID(ctx context.Context, customerID string) ([]*entity.Order, error)
 	CreateOrder(ctx context.Context, orderRequest *entity.OrderRequest) (*string, error)
+	DeleteOrderByID(ctx context.Context, orderID string) error
 }
 
 type orderService struct {
@@ -92,4 +93,15 @@ func (s *orderService) CreateOrder(ctx context.Context, orderRequest *entity.Ord
 	}
 
 	return id, nil
+}
+
+func (s *orderService) DeleteOrderByID(ctx context.Context, orderID string) error {
+	s.logger.Info("Deleting order by ID", "ID", orderID, "traceID", ctx.Value("traceID"))
+	err := s.orderGtw.DeleteOrderByID(ctx, &orderID)
+	if err != nil {
+		s.logger.Error("Failed to delete order by ID", "error", err, "traceID", ctx.Value("traceID"))
+		return err
+	}
+
+	return nil
 }

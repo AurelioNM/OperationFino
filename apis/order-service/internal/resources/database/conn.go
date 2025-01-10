@@ -2,63 +2,46 @@ package database
 
 import (
 	"context"
-	"database/sql"
 	"fmt"
 	"log/slog"
-	"net/url"
 	"os"
-	"strconv"
 	"time"
 
 	_ "github.com/jackc/pgx/v4/stdlib"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 type DbConn struct {
-	DB *sql.DB
+	DB *mongo.Client
 }
 
 func CreateDBConnPool(logger slog.Logger) (*DbConn, error) {
-	logger.Debug("Creating DB DSN config")
-	url := &url.URL{
-		Scheme: os.Getenv("DB_TYPE"),
-		Host:   fmt.Sprintf("%s:%s", os.Getenv("DB_HOST"), os.Getenv("DB_PORT")),
-		User:   url.UserPassword(os.Getenv("DB_USERNAME"), os.Getenv("DB_PASSWORD")),
-		Path:   os.Getenv("DB_NAME"),
+	logger.Debug("Creating MongoDB config")
+
+	uri := os.Getenv("DB_URI")
+	clientOptions := options.Client().ApplyURI(uri)
+
+	client, err := mongo.Connect(context.Background(), clientOptions)
+	if err != nil {
+		return nil, fmt.Errorf("Failed to create DB client: %s", err)
 	}
 
 	timeout, err := time.ParseDuration(os.Getenv("DB_TIMEOUT"))
 	if err != nil {
 		return nil, fmt.Errorf("Failed to get DB_TIMEOUT from .env: %s", err)
 	}
-	connOpen, err := strconv.Atoi(os.Getenv("DB_MAX_OPEN_CONN"))
-	if err != nil {
-		return nil, fmt.Errorf("Failed to get DB_MAX_OPEN_CONN from .env: %s", err)
-	}
-	logger.Debug("Creating DB conn pool")
 
 	ctx, cancel := context.WithTimeout(context.Background(), timeout)
 	defer cancel()
 
-	db, err := sql.Open("pgx", url.String())
-	if err != nil {
-		return nil, fmt.Errorf("Failed to initialize DB conn pool: %s", err)
-	}
-
-	if err = db.PingContext(ctx); err != nil {
+	if err = client.Ping(ctx, nil); err != nil {
 		return nil, fmt.Errorf("Failed to ping DB: %s", err)
 	}
 
-	db.SetConnMaxLifetime(timeout)
-	db.SetMaxIdleConns(connOpen)
-	db.SetMaxOpenConns(connOpen)
-
-	logger.Debug("Conn pool created",
-		slog.String("url", url.String()),
-		slog.String("ConnTimeout", timeout.String()),
-		slog.Int("MaxConnLifetime", connOpen),
-		slog.Int("SetMaxOpenConn", connOpen))
+	logger.Debug("Conn pool created", "url", uri)
 
 	return &DbConn{
-		DB: db,
+		DB: client,
 	}, nil
 }

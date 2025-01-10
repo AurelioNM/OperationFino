@@ -46,3 +46,12 @@
     - [ ] Nginx
     - [ ] Circuit Break
 
+
+Mongo commands
+
+mongosh "mongodb://order:order@of-order-mongo:27017/admin" --apiVersion 1 --username order
+use order-service
+db.order.find()
+db.order.find({ _id: ObjectId("67806546497f5c6e81dde4ec") });
+
+

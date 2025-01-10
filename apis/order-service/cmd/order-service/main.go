@@ -38,7 +38,11 @@ func main() {
 		Level: slog.LevelDebug,
 	}))
 
-	// TODO db conn
+	db, err := database.CreateDBConnPool(*logger)
+	if err != nil {
+		logger.Error("Error creating DB", "error", err)
+		return
+	}
 
 	// Metrics
 	reg := prometheus.NewRegistry()
@@ -48,7 +52,7 @@ func main() {
 
 	customerGtw := client.NewCustomerGateway(*logger, metrics)
 	productGtw := client.NewProductGateway(*logger, metrics)
-	orderGtw := database.NewOrderGateway(*logger)
+	orderGtw := database.NewOrderGateway(*logger, db.DB)
 	orderSvc := service.NewOrderService(*logger, orderGtw, customerGtw, productGtw)
 	orderHandler := api.NewOrderHandler(*logger, metrics, orderSvc)
 
@@ -68,6 +72,7 @@ func createRouter(prometheusHandler http.Handler, orderHandler api.OrderHandler)
 
 	r.HandleFunc("/metrics", prometheusHandler.ServeHTTP).Methods("GET")
 	r.HandleFunc("/v1/orders/{id}", orderHandler.GetOrderByID).Methods("GET")
+	r.HandleFunc("/v1/orders/customers/{customerID}", orderHandler.GetOrdersByCustomerID).Methods("GET")
 	r.HandleFunc("/v1/orders", orderHandler.CreateOrder).Methods("POST")
 
 	r.PathPrefix("/orders/doc/").Handler(httpSwagger.Handler(

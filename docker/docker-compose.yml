@@ -29,6 +29,8 @@ services:
   of-order-service:
     build: ../apis/order-service/
     container_name: of-order-service
+    depends_on:
+      - of-order-mongo
     ports:
       - "8003:8003"
     environment:
@@ -63,6 +65,19 @@ services:
     volumes:
       - ../apis/product-service/db-schema/:/docker-entrypoint-initdb.d/
       - of_product_postgres_vol:/var/lib/postgresql/data
+    networks:
+      - of-network
+
+  of-order-mongo:
+    image: mongo
+    container_name: of-order-mongo
+    ports:
+      - "27018:27017"
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=order
+      - MONGO_INITDB_ROOT_PASSWORD=order
+    volumes:
+      - of_order_mongo_vol:/data/db
     networks:
       - of-network
 
@@ -111,6 +126,7 @@ services:
 volumes:
   of_customer_postgres_vol: {}
   of_product_postgres_vol: {}
+  of_order_mongo_vol: {}
   of_prometheus_vol: {}
   of_grafana_vol: {}
 

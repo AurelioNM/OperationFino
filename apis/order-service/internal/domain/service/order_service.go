@@ -13,6 +13,7 @@ import (
 
 type OrderService interface {
 	GetOrderByID(ctx context.Context, orderID string) (*entity.Order, error)
+	GetOrdersByCustomerID(ctx context.Context, customerID string) ([]*entity.Order, error)
 	CreateOrder(ctx context.Context, orderRequest *entity.OrderRequest) (*string, error)
 }
 
@@ -41,6 +42,17 @@ func (s *orderService) GetOrderByID(ctx context.Context, orderID string) (*entit
 	}
 
 	return order, nil
+}
+
+func (s *orderService) GetOrdersByCustomerID(ctx context.Context, customerID string) ([]*entity.Order, error) {
+	s.logger.Info("Getting orders list by customerID", "customerID", customerID, "traceID", ctx.Value("traceID"))
+	orders, err := s.orderGtw.GetOrdersByCustomerID(ctx, &customerID)
+	if err != nil {
+		s.logger.Error("Failed to get orders list by customerID", "error", err, "traceID", ctx.Value("traceID"))
+		return nil, err
+	}
+
+	return orders, nil
 }
 
 func (s *orderService) CreateOrder(ctx context.Context, orderRequest *entity.OrderRequest) (*string, error) {

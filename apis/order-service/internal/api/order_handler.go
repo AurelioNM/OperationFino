@@ -17,6 +17,7 @@ import (
 
 type OrderHandler interface {
 	GetOrderByID(w http.ResponseWriter, r *http.Request)
+	GetOrdersByCustomerID(w http.ResponseWriter, r *http.Request)
 	CreateOrder(w http.ResponseWriter, r *http.Request)
 }
 
@@ -59,6 +60,27 @@ func (h *orderHandler) GetOrderByID(w http.ResponseWriter, r *http.Request) {
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Order by ID: %s", id), now, map[string]interface{}{"order": order})
+}
+
+func (h *orderHandler) GetOrdersByCustomerID(w http.ResponseWriter, r *http.Request) {
+	now := time.Now()
+	ctx := h.getContext(r)
+	h.logger.Debug("GET orders by customerID request", "traceID", ctx.Value("traceID"))
+
+	vars := mux.Vars(r)
+	customerID := vars["customerID"]
+	h.logger.Debug("Vars", "customerID", customerID, "traceID", ctx.Value("traceID"))
+
+	orders, err := h.orderSvc.GetOrdersByCustomerID(ctx, customerID)
+	if err != nil {
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/orders/customers/{customerId}", now)
+		return
+	}
+
+	h.metrics.MeasureDuration(now, "GET", "/v1/orders/customers/{customerId}", "200")
+	h.metrics.IncReqByStatusCode("200")
+
+	h.buildResponse(w, fmt.Sprintf("Order by ID: %s", customerID), now, map[string]interface{}{"orders": orders})
 }
 
 func (h *orderHandler) CreateOrder(w http.ResponseWriter, r *http.Request) {

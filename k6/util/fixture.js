@@ -24,6 +24,19 @@ export const customerEmails = [
     "NCMrtCMR@gmail.com",
 ];
 
+export const customersNames = [
+    "Arthur",
+    "Eduardo",
+    "Carlos",
+    "Enzo",
+    "Valentina",
+    "Marcos",
+    "Luiz",
+    "Samuel",
+    "Arthur",
+    "Sophia",
+];
+
 export const productIds = [
     "01JHAEDWSWXPEKP698SBBB2QH9",
     "01JHAEDWTFHDF85CZNQQR93VFV",

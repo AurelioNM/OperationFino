@@ -177,11 +177,11 @@ func (h *customerHandler) V2GetCustomerByName(w http.ResponseWriter, r *http.Req
 
 	customer, err := h.customerSvc.V2GetCustomerByName(ctx, name)
 	if err != nil {
-		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v1/customers/name/{customerName}", now)
+		h.buildErrorResponse(w, err.Error(), http.StatusNotFound, "GET", "/v2/customers/name/{customerName}", now)
 		return
 	}
 
-	h.metrics.MeasureDuration(now, "GET", "/v1/customers/name/{customerName}", "200")
+	h.metrics.MeasureDuration(now, "GET", "/v2/customers/name/{customerName}", "200")
 	h.metrics.IncReqByStatusCode("200")
 
 	h.buildResponse(w, fmt.Sprintf("Customer by name: %s", name), now, map[string]interface{}{"customer": customer})

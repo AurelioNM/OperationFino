@@ -48,7 +48,7 @@
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
     - [ ] Melhorar metrica e dash de ReqByStatusCode
 - Tests
-    - [ ] Add /utils no k6 para funcoes comuns entre os testes
+    - [X] Add /utils e /fixtures para k6
     - [ ] Robot
     - [ ] Test Containers
     - [ ] Vegeta

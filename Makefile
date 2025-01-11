@@ -31,7 +31,7 @@ db-get:
 
 db-customer-data:
 	clear && docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
-		"SELECT email as customer_email FROM customers LIMIT 10; SELECT customer_id as customer_id FROM customers LIMIT 10;"
+		"SELECT email as customer_email FROM customers LIMIT 10; SELECT customer_id as customer_id FROM customers LIMIT 10; SELECT name as customer_name FROM customers LIMIT 10;"
 
 db-product-data:
 	clear && docker exec of-product-postgres psql -v ON_ERROR_STOP=1 --username "product" --dbname "product-service" -c \

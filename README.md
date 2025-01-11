@@ -28,20 +28,21 @@
 
 
 ### Sprint 2 - Tasks
-- [ ] Customer service
+- Customer service
     - [x] Get by name V1
     - [x] Get by name V2 with cache
     - [ ] Finish unit tests
-- [ ] Product service
+- Product service
     - [X] CRUD operations
     - [X] Load tests
     - [X] Profiler and Metrics config
-- [ ] Order service
+- Order service
     - [X] External requests to product and customer
     - [X] CRUD operations
     - [ ] Load tests
 - Observability
-    - [ ] Add metricas na camada de DB
+    - [X] Add metricas na camada de DB
+    - [ ] Melhorar labels de external calls
     - [ ] Configurar grafana docker - sync entre edição dos dashs e arquivo de config
     - [ ] Melhorar metrica e dash de ReqByStatusCode
 - Tests

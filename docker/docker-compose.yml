@@ -1,6 +1,7 @@
 version: "3.7"
 services:
 
+  # Services
   of-customer-service:
     build: ../apis/customer-service/
     container_name: of-customer-service
@@ -38,6 +39,7 @@ services:
     networks:
       - of-network
 
+  # Databases
   of-customer-postgres:
     image: postgres
     container_name: of-customer-postgres
@@ -81,6 +83,7 @@ services:
     networks:
       - of-network
 
+  # Cache
   of-customer-redis:
     image: redis
     container_name: of-customer-redis
@@ -89,6 +92,7 @@ services:
     networks:
       - of-network
 
+  # Observability
   of-prometheus:
     image: prom/prometheus
     container_name: of-prometheus
@@ -114,6 +118,7 @@ services:
     networks:
       - of-network
 
+  # Profiling
   of-pyroscope:
     image: pyroscope/pyroscope:latest
     container_name: of-pyroscope

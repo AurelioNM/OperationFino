@@ -59,7 +59,7 @@ func main() {
 	prometheusHandler := promhttp.HandlerFor(reg, promhttp.HandlerOpts{Registry: reg})
 
 	metrics := metrics.NewCustomerMetrics(*logger, reg)
-	customerGtw := database.NewCustomerGateway(*logger, db.DB)
+	customerGtw := database.NewCustomerGateway(*logger, metrics, db.DB)
 	customerCache := cache.NewCustomerCache(*logger, cacheClient)
 	customerSvc := service.NewCustomerService(*logger, customerGtw, customerCache)
 	customerHandler := api.NewCustomerHandler(*logger, metrics, customerSvc)

@@ -31,11 +31,11 @@ func (g *customerGateway) GetCustomerByEmail(ctx context.Context, customerEmail 
 	now := time.Now()
 
 	res, err := http.Get(url)
+	g.metrics.MeasureExternalDuration(now, "customer-service", "GET", "/v2/customers/email/{email}", "")
 	if err != nil {
 		g.logger.Error("Customer-service request failed", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
 	}
-	g.metrics.MeasureExternalDuration(now, "customer-service", "GET", "/v2/customers/email/{email}", "200")
 
 	body, err := g.getBodyFromResponse(ctx, res)
 	if err != nil {

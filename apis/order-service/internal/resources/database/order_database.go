@@ -3,23 +3,27 @@ package database
 import (
 	"cmd/order-service/internal/domain/entity"
 	"cmd/order-service/internal/domain/gateway"
+	"cmd/order-service/internal/metrics"
 	"context"
 	"fmt"
 	"log/slog"
+	"time"
 
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type orderGateway struct {
-	logger slog.Logger
-	db     *mongo.Client
+	logger  slog.Logger
+	metrics *metrics.OrderMetrics
+	db      *mongo.Client
 }
 
-func NewOrderGateway(l slog.Logger, db *mongo.Client) gateway.OrderGateway {
+func NewOrderGateway(l slog.Logger, m *metrics.OrderMetrics, db *mongo.Client) gateway.OrderGateway {
 	return &orderGateway{
-		logger: *l.With("layer", "order-database"),
-		db:     db,
+		logger:  *l.With("layer", "order-database"),
+		metrics: m,
+		db:      db,
 	}
 }
 
@@ -29,8 +33,10 @@ func (g *orderGateway) GetOrderByID(ctx context.Context, orderID *string) (*enti
 
 	var order entity.Order
 	filter := bson.M{"id": orderID}
+	start := time.Now()
 
 	err := collection.FindOne(ctx, filter).Decode(&order)
+	g.metrics.MeasureExternalDuration(start, "database", "OrderDB", "GetOrderByID", "")
 	if err != nil {
 		if err != mongo.ErrNoDocuments {
 			g.logger.Error("Order not found by ID", "error", err, "traceID", ctx.Value("traceID"))
@@ -49,8 +55,10 @@ func (g *orderGateway) GetOrdersByCustomerID(ctx context.Context, customerID *st
 
 	var orders []*entity.Order
 	filter := bson.M{"customer.id": customerID}
+	start := time.Now()
 
 	cursor, err := collection.Find(ctx, filter)
+	g.metrics.MeasureExternalDuration(start, "database", "OrderDB", "GetOrdersByCustomerID", "")
 	if err != nil {
 		g.logger.Error("Failed to find orders list by customerID in DB", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
@@ -68,8 +76,10 @@ func (g *orderGateway) GetOrdersByCustomerID(ctx context.Context, customerID *st
 func (g *orderGateway) CreateOrder(ctx context.Context, order *entity.Order) (*string, error) {
 	g.logger.Debug("Inserting order into DB", "traceID", ctx.Value("traceID"))
 	collection := g.db.Database("order-service").Collection("order")
+	start := time.Now()
 
 	insertResult, err := collection.InsertOne(ctx, order)
+	g.metrics.MeasureExternalDuration(start, "database", "OrderDB", "CreateOrder", "")
 	if err != nil {
 		g.logger.Error("Failed to insert order into DB", "error", err, "traceID", ctx.Value("traceID"))
 		return nil, err
@@ -84,8 +94,10 @@ func (g *orderGateway) DeleteOrderByID(ctx context.Context, orderID *string) err
 	collection := g.db.Database("order-service").Collection("order")
 
 	filter := bson.M{"id": orderID}
+	start := time.Now()
 
 	deletedResult, err := collection.DeleteOne(ctx, filter)
+	g.metrics.MeasureExternalDuration(start, "database", "OrderDB", "DeleteOrderByID", "")
 	if err != nil {
 		g.logger.Error("Failed to find order by ID in DB", "error", err, "traceID", ctx.Value("traceID"))
 		return err

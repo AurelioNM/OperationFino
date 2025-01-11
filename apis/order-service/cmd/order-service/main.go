@@ -52,7 +52,7 @@ func main() {
 
 	customerGtw := client.NewCustomerGateway(*logger, metrics)
 	productGtw := client.NewProductGateway(*logger, metrics)
-	orderGtw := database.NewOrderGateway(*logger, db.DB)
+	orderGtw := database.NewOrderGateway(*logger, metrics, db.DB)
 	orderSvc := service.NewOrderService(*logger, orderGtw, customerGtw, productGtw)
 	orderHandler := api.NewOrderHandler(*logger, metrics, orderSvc)
 

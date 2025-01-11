@@ -1,5 +1,7 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import * as util from '../util/util.js';
+import * as fixture from '../util/fixture.js';
 
 export const options = {
 	stages: [
@@ -11,24 +13,8 @@ export const options = {
 	]
 }
 
-function generateRandomString(length, charset = '') {
-	if (!charset) charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-	let str = ''
-	while (length --) str += charset[(Math.random() * charset.length) | 0]
-	return str
-}
-
-function generateJson() {
-	return JSON.stringify({
-		name: generateRandomString(6),
-		surname: generateRandomString(6),
-		email: `errorEmail@gmail.com`,
-		birthdate: "1998-08-18"
-	})
-}
-
 export default function() {
-	let url = "http://127.0.0.1:8001/v1/customers"
+	let url = `${util.customerBaseUrl}/v1/customers`
 	const params = {
 		headers: {
 			'Content-Type': 'application/json',
@@ -65,3 +51,13 @@ export default function() {
 		'delete status 200': (r) => r.status === 200
 	})
 }
+
+function generateJson() {
+	return JSON.stringify({
+		name: util.randomString(6),
+		surname: util.randomString(6),
+		email: `errorEmail@gmail.com`,
+		birthdate: "1998-08-18"
+	})
+}
+

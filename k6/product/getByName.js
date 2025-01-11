@@ -8,5 +8,5 @@ export const options = {
 };
 
 export default function() {
-	http.get(`${util.productBaseUrl}/v1/products/${util.randomItemFromArray(fixture.productIds)}`)
+	http.get(`${util.productBaseUrl}/v1/products/name/${util.randomItemFromArray(fixture.productNames)}`)
 }

@@ -29,11 +29,14 @@ db-get:
 	&& docker exec of-product-postgres psql -v ON_ERROR_STOP=1 --username "product" --dbname "product-service" -c \
 		"SELECT * FROM products LIMIT 10;"
 
-db-test-data:
-	docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
-		"SELECT email as customer_email FROM customers LIMIT 20;" \
-	&& docker exec of-product-postgres psql -v ON_ERROR_STOP=1 --username "product" --dbname "product-service" -c \
-		"SELECT name as product_name FROM products LIMIT 20;"
+db-customer-data:
+	clear && docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
+		"SELECT email as customer_email FROM customers LIMIT 10; SELECT customer_id as customer_id FROM customers LIMIT 10;"
+
+db-product-data:
+	clear && docker exec of-product-postgres psql -v ON_ERROR_STOP=1 --username "product" --dbname "product-service" -c \
+		"SELECT name as product_name FROM products LIMIT 10; SELECT product_id as product_id FROM products LIMIT 10;"
+
 db-clean:
 	docker exec of-customer-postgres psql -v ON_ERROR_STOP=1 --username "customer" --dbname "customer-service" -c \
 		"DELETE FROM customers;" \

@@ -1,5 +1,6 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import * as util from '../util/util.js';
 
 export const options = {
 	vus: 1,
@@ -7,7 +8,7 @@ export const options = {
 };
 
 export default function() {
-	let url = "http://127.0.0.1:8002/v1/products"
+	let url = `${util.productBaseUrl}/v1/products`
 
 	// POST
 	const createResponse = http.post(url, generateJson())
@@ -37,31 +38,11 @@ export default function() {
 	})
 }
 
-function generateRandomString(length, charset = '') {
-	if (!charset) charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-	let str = ''
-	while (length --) str += charset[(Math.random() * charset.length) | 0]
-	return str
-}
-
 function generateJson() {
 	return JSON.stringify({
-		name: generateRandomString(6),
-		description: generateRandomString(30),
-		price: randomPrice(),
-		quantity: randomInteger(1, 100)
+		name: util.randomString(6),
+		description: util.randomString(30),
+		price: util.randomPrice(),
+		quantity: util.randomInteger(1, 100)
 	})
 }
-
-function randomPrice() {
-	const min = 1.00
-	const max = 1000000.00
-	const decimals = 2
-	const price = (Math.random() * (max - min) + min).toFixed(decimals)
-	return parseFloat(price)
-}
-
-function randomInteger(min, max) {
-	return Math.floor(Math.random() * (max - min + 1) + min)
-}
-

@@ -1,14 +1,16 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import * as util from '../util/util.js';
 
 export const options = {
-	vus: 1,
-	duration: '10s',
-	iterations: 1,
+	vus: 5,
+	duration: '1m',
 };
 
 export default function() {
-	const res = http.get("http://127.0.0.1:8001/v1/customers")
+	const url = `${util.customerBaseUrl}/v1/customers`
+
+	const res = http.get(url)
 	check(res, {
 		'status 200': (r) => r.status === 200
 	})

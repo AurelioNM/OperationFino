@@ -36,10 +36,12 @@
     - [X] CRUD operations
     - [X] Load tests
     - [X] Profiler and Metrics config
+    - [ ] Add getByName no swagger
 - Order service
     - [X] External requests to product and customer
     - [X] CRUD operations
     - [ ] Load tests
+    - [ ] Atualizar swagger
 - Observability
     - [X] Add metricas na camada de DB
     - [ ] Melhorar labels de external calls

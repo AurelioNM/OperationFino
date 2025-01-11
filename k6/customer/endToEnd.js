@@ -1,5 +1,7 @@
 import http from 'k6/http';
 import { check } from 'k6';
+import * as util from '../util/util.js';
+import * as fixture from '../util/fixture.js';
 
 export const options = {
 	vus: 1,
@@ -7,7 +9,7 @@ export const options = {
 };
 
 export default function() {
-	let url = "http://127.0.0.1:8001/v1/customers"
+	let url = `${util.customerBaseUrl}/v1/customers`
 
 	// POST
 	const createResponse = http.post(url, generateJson())
@@ -37,18 +39,11 @@ export default function() {
 	})
 }
 
-function generateRandomString(length, charset = '') {
-	if (!charset) charset = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789'
-	let str = ''
-	while (length --) str += charset[(Math.random() * charset.length) | 0]
-	return str
-}
-
 function generateJson() {
 	return JSON.stringify({
-		name: generateRandomString(6),
-		surname: generateRandomString(6),
-		email: `${generateRandomString(8)}@gmail.com`,
+		name: util.randomItemFromArray(fixture.customerNames),
+		surname: util.randomItemFromArray(fixture.customerNames),
+		email: `${util.randomString(8)}@gmail.com`,
 		birthdate: "1998-08-18"
 	})
 }

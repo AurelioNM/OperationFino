@@ -92,6 +92,29 @@ services:
     networks:
       - of-network
 
+  # AI
+  of-order-ai-web-ui:
+    image: ghcr.io/open-webui/open-webui:main
+    container_name: of-order-ai-web-ui
+    ports:
+      - "8085:8080"
+    environment:
+      OLLAMA_BASE_URLS: http://of-order-ollama:11434
+    volumes:
+      - ./open-webui-local:/app/backend/data
+    networks:
+      - of-network
+
+  of-order-ollama:
+    image: ollama/ollama:latest
+    container_name: of-order-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ./ollama-local:/root/.ollama
+    networks:
+      - of-network
+
   # Observability
   of-prometheus:
     image: prom/prometheus
